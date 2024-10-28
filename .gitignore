@@ -1,0 +1,5 @@
+todo.md
+__pycache__
+.env
+.python-version
+.venv
