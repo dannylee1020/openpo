@@ -4,7 +4,6 @@ from datetime import datetime
 
 import streamlit as st
 from client import CustomClient
-from internal import util
 from pydantic import BaseModel
 
 client = CustomClient()
@@ -69,17 +68,26 @@ def save_pref(message_id, preferred, rejected):
 
 def handle_input():
     if st.session_state.user_input.strip():
-        # Add user message
         message = st.session_state.user_input
         add_message("user", message)
 
+
+def process_message():
+    messages = st.session_state.messages
+    if not messages:
+        return
+
+    last_message_id = max(messages.keys())
+    last_message = messages[last_message_id]
+
+    if last_message["role"] == "user":
         print("sending request to openai")
 
         response = client.beta.chat.completions.parse(
             model="gpt-4o",
             messages=[
                 {"role": "system", "content": PROMPT},
-                {"role": "user", "content": message},
+                {"role": "user", "content": last_message["content"]},
             ],
             response_format=ResponseModel,
             n=2,
@@ -105,7 +113,7 @@ def handle_input():
 
 
 def main():
-    st.set_page_config(page_title="Peony Chat 🌸")
+    st.set_page_config(page_title="Peony Chat")
 
     # Custom CSS combining both styles
     st.markdown(
@@ -226,14 +234,15 @@ def main():
     # Main container
     with st.container():
         st.markdown('<div class="main-content">', unsafe_allow_html=True)
-        st.title("Chat Interface with Comparisons")
-
+        st.title("Peony Chat 🌸")
         # Messages container
         with st.container():
             st.markdown('<div class="main-container">', unsafe_allow_html=True)
+            # display message
 
-            # Display messages
-            print(st.session_state.messages)
+            with st.spinner("waiting for the response..."):
+                process_message()
+
             for message_id, message in st.session_state.messages.items():
                 if message["role"] == "user":
                     # User message
@@ -329,7 +338,7 @@ def main():
         unsafe_allow_html=True,
     )
 
-    st.text_input(
+    user_query = st.text_input(
         "Message",
         key="user_input",
         on_change=handle_input,
