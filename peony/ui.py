@@ -1,14 +1,16 @@
 import json
 import random
+import uuid
 from datetime import datetime
 
 import streamlit as st
 from client import CustomClient
+from internal import storage
 from pydantic import BaseModel
 
 client = CustomClient()
 
-PROMPT = "provide data in JSON format. make your response concise"
+PROMPT = "You are a helpful assistant. Help your users with concise and clear answers."
 
 
 class ResponseModel(BaseModel):
@@ -61,7 +63,12 @@ def save_pref(message_id, preferred, rejected):
     prev_msg = st.session_state.messages[message_id - 1]
     prompt = prev_msg["content"] if prev_msg["role"] == "user" else ""
 
-    data = {"prompt": prompt, "preferred": preferred, "rejected": rejected}
+    data = {
+        "id": uuid.uuid1(),
+        "prompt": prompt,
+        "preferred": preferred,
+        "rejected": rejected,
+    }
 
     st.session_state.pref_data.append(data)
 
@@ -83,31 +90,22 @@ def process_message():
     if last_message["role"] == "user":
         print("sending request to openai")
 
-        response = client.beta.chat.completions.parse(
+        response = client.beta.chat.completions.parse_preference(
             model="gpt-4o",
             messages=[
                 {"role": "system", "content": PROMPT},
                 {"role": "user", "content": last_message["content"]},
             ],
-            response_format=ResponseModel,
-            n=2,
-            temperature=1.2,
+            diff_frequency=0.2,
         )
 
         print("done getting response from openai")
 
         res = json.loads(response.choices[0].message.content)
-
-        print(res)
-
         first_res = res["first_response"]
-        second_res = res["second_response"]
+        second_res = res["second_response"] if len(res.keys()) > 1 else None
 
-        if random.random() < 0.3:
-            add_message("assistant", first_res, alt_content=second_res)
-        else:
-            add_message("assistant", first_res)
-
+        add_message("assistant", first_res, alt_content=second_res)
         # Clear input
         st.session_state.user_input = ""
 
@@ -286,9 +284,10 @@ def main():
                                         message["alt_content"],
                                     )
 
-                                print(f"votes: {st.session_state.votes}")
-                                print(f"preference data: {st.session_state.pref_data}")
-
+                                    with storage.get_db_conn() as conn:
+                                        storage.save_to_db(
+                                            conn, st.session_state.pref_data
+                                        )
                         with col2:
                             st.markdown("### Response B")
                             st.markdown(
@@ -310,9 +309,10 @@ def main():
                                         message["content"],
                                     )
 
-                                print(f"votes: {st.session_state.votes}")
-                                print(f"preference data: {st.session_state.pref_data}")
-
+                                    with storage.get_db_conn() as conn:
+                                        storage.save_to_db(
+                                            conn, st.session_state.pref_data
+                                        )
                         st.markdown("</div>", unsafe_allow_html=True)
                     else:
                         # Single response
