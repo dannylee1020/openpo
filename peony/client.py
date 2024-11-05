@@ -3,8 +3,8 @@ import typing
 
 import openai
 
-from resources.beta import beta
-from resources.chat import chat
+from peony.resources.beta import beta
+from peony.resources.chat import chat
 
 
 class CustomClient:
