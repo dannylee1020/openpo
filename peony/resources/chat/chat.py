@@ -1,4 +1,4 @@
-from resources.chat import completions
+from peony.resources.chat import completions
 
 
 class Chat:
