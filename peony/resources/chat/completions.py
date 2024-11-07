@@ -1,114 +1,99 @@
+import json
+import random
 from typing import Dict, Iterable, List, Optional, Union
 
-import httpx
-import openai
+import litellm
+from pydantic import BaseModel
 from typing_extensions import Literal
+
+from peony.internal import prompt
+
+
+class ExtractModel(BaseModel):
+    main_answer: str
+    key_points: str
+
+
+class PreferenceModel(BaseModel):
+    first_response: str
+    second_response: str | None
+
+
+class ResponseModel(BaseModel):
+    first_response: str
 
 
 class Completions:
-    def __init__(self):
-        self.client = openai.OpenAI()
+    def create_preference(
+        self,
+        *,
+        model: str,
+        messages: list[str],
+        response_format: Optional[dict] | None = None,
+        temperature: Optional[float] | None = None,
+        # openai optional params
+        frequency_penalty: Optional[float] | None = None,
+        presence_penalty: Optional[float] | None = None,
+        # class specific param
+        diff_frequency: Optional[float] = 0.0,
+    ):
+        if random.random() < diff_frequency:
+            print("preference")
+
+            core_response = litellm.completion(
+                model=model,
+                messages=[
+                    {"role": "system", "content": prompt.EXTRACT_PROMPT},
+                    *messages[1:],
+                ],
+                response_format=ExtractModel,
+                temperature=0.0,
+            )
+
+            core_content = json.loads(core_response.choices[0].message.content)
+
+            pref_response = litellm.completion(
+                model=model,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": prompt.PREF_PROMPT.format(
+                            core_content["main_answer"], core_content["key_points"]
+                        ),
+                    },
+                    *messages[1:],
+                ],
+                response_format=PreferenceModel,
+                temperature=1.0,
+                presence_penalty=0.6,
+                frequency_penalty=0.6,
+                drop_params=True,
+            )
+
+            return pref_response
+
+        completion = litellm.completion(
+            model=model,
+            messages=messages,
+            response_format=response_format or ResponseModel,
+            frequency_penalty=frequency_penalty,
+            presence_penalty=presence_penalty,
+            drop_params=True,
+        )
+
+        return completion
 
     def create(
         self,
         *,
         model: str,
-        messages: str,
-        frequency_penalty: Optional[float] | None = None,
-        function_call=None,
-        logit_bias: Optional[Dict[str, int]] | None = None,
-        logprobs: Optional[bool] | None = None,
-        max_completion_tokens: Optional[int] | None = None,
-        max_tokens: Optional[int] | None = None,
-        metadata: Optional[Dict[str, str]] | None = None,
-        n: Optional[int] | None = None,
-        parallel_tool_calls: bool = False,
-        presence_penalty: Optional[float] | None = None,
-        response_format=None,
-        seed: Optional[int] | None = None,
-        service_tier: Optional[Literal["auto", "default"]] | None = None,
-        stop: Union[Optional[str], List[str]] | None = None,
-        store: Optional[bool] = False,
-        stream: Optional[Literal[False]] | None = None,
-        stream_options=None,
-        temperature: Optional[float] | None = None,
-        tool_choice=None,
-        tools=None,
-        top_logprobs: Optional[int] | None = None,
-        top_p: Optional[float] | None = None,
-        user: str | None = None,
-        extra_headers=None,
-        extra_query=None,
-        extra_body=None,
-        timeout: float | httpx.Timeout | None = None,
+        messages: list[str],
+        response_format: Optional[dict] | None = None,
     ):
-        tools_kwargs = {
-            "tools": tools,
-            "parallel_tool_calls": parallel_tool_calls,
-            "tool_choice": tool_choice,
-        }
-
-        if tools:
-            completions = self.client.chat.completions.create(
-                model=model,
-                messages=messages,
-                frequency_penalty=frequency_penalty,
-                function_call=function_call,
-                logit_bias=logit_bias,
-                logprobs=logprobs,
-                max_completion_tokens=max_completion_tokens,
-                max_tokens=max_tokens,
-                metadata=metadata,
-                n=n,
-                presence_penalty=presence_penalty,
-                response_format=response_format,
-                seed=seed,
-                service_tier=service_tier,
-                stop=stop,
-                store=store,
-                stream=stream,
-                stream_options=stream_options,
-                temperature=temperature,
-                tool_choice=tool_choice,
-                top_logprobs=top_logprobs,
-                top_p=top_p,
-                user=user,
-                extra_headers=extra_headers,
-                extra_query=extra_query,
-                extra_body=extra_body,
-                timeout=timeout,
-                **tool_kwarg,
-            )
-
-            return completions
-
-        completions = self.client.chat.completions.create(
+        completions = litellm.completion(
             model=model,
             messages=messages,
-            frequency_penalty=frequency_penalty,
-            function_call=function_call,
-            logit_bias=logit_bias,
-            logprobs=logprobs,
-            max_completion_tokens=max_completion_tokens,
-            max_tokens=max_tokens,
-            metadata=metadata,
-            n=n,
-            presence_penalty=presence_penalty,
             response_format=response_format,
-            seed=seed,
-            service_tier=service_tier,
-            stop=stop,
-            store=store,
-            stream=stream,
-            stream_options=stream_options,
-            temperature=temperature,
-            top_logprobs=top_logprobs,
-            top_p=top_p,
-            user=user,
-            extra_headers=extra_headers,
-            extra_query=extra_query,
-            extra_body=extra_body,
-            timeout=timeout,
         )
 
         return completions
