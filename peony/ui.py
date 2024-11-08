@@ -6,10 +6,18 @@ from datetime import datetime
 
 import streamlit as st
 from client import CustomClient
-from internal import storage
 from pydantic import BaseModel
 
+from peony.adapters import postgres as pg
+
 client = CustomClient()
+pClient = pg.PostgresAdapter(
+    host="localhost",
+    dbname="postgres",
+    user="postgres",
+    pw="postgres",
+    port="5432",
+)
 
 PROMPT = "Help users with clear answer. Make your answer short but good quality."
 
@@ -227,6 +235,11 @@ def main():
                                     last_msg["alt_content"],
                                 )
 
+                                pClient.save_feedback(
+                                    table="preference",
+                                    data=st.session_state.pref_data,
+                                )
+
                         with col2:
                             st.markdown("### Response B")
 
@@ -243,6 +256,11 @@ def main():
                                     last_msg_id,
                                     last_msg["alt_content"],
                                     last_msg["content"],
+                                )
+
+                                pClient.save_feedback(
+                                    table="preference",
+                                    data=st.session_state.pref_data,
                                 )
 
                     else:
