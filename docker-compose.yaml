@@ -1,7 +1,16 @@
 services:
+  streamlit:
+    build:
+      context: .
+      dockerfile: ./demo/Dockerfile
+    ports:
+      - "8501:8501"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
   db:
     image: postgres:latest
-    container_name: postgres
+    container_name: postgres_dev
     environment:
       POSTGRES_PASSWORD: postgres
     ports:
