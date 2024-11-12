@@ -17,9 +17,9 @@ pClient = pg.PostgresAdapter(
     port="5432",
 )
 
-PROMPT = "Help users with clear answer. Make your answer short but good quality."
-DIFF_FREQUENCY = 0.5
-MODEL = "claude-3-5-sonnet-20240620"
+PROMPT = (
+    "Answer user questions with clear answer. Make your answer short but good quality."
+)
 
 
 def init_session_state():
@@ -62,25 +62,26 @@ def add_message(role, content, alt_content=None):
     st.session_state.counter += 1
 
 
-def process_messages(messages):
+def process_messages(messages, model, diff_frequency):
     last_message_id = max(messages.keys())
     last_message = messages[last_message_id]
 
     if last_message["role"] == "user":
         print("sending request to model")
 
-        response = client.chat.completions.create_preference(
-            model=MODEL,
-            messages=[
-                *st.session_state.context,
-                {"role": "user", "content": last_message["content"]},
-            ],
-            diff_frequency=DIFF_FREQUENCY,
-        )
+        with st.spinner(text="model processing message..."):
+            response = client.chat.completions.create_preference(
+                model=model,
+                messages=[
+                    *st.session_state.context,
+                    {"role": "user", "content": last_message["content"]},
+                ],
+                diff_frequency=diff_frequency,
+            )
 
-        res = json.loads(response.choices[0].message.content)
-        first_res = res["first_response"]
-        second_res = res["second_response"] if len(res.keys()) > 1 else None
+            res = json.loads(response.choices[0].message.content)
+            first_res = res["first_response"]
+            second_res = res["second_response"] if len(res.keys()) > 1 else None
 
         add_message("assistant", first_res, alt_content=second_res)
 
@@ -91,7 +92,7 @@ def handle_vote(message_id, preferred):
         st.session_state.votes[message_id]["preferred"] = preferred
 
 
-def handle_input():
+def handle_input(model, diff_frequency):
     if st.session_state.user_input.strip():
         message = st.session_state.user_input
         add_message("user", message)
@@ -100,7 +101,7 @@ def handle_input():
     if not messages:
         return
 
-    process_messages(messages)
+    process_messages(messages, model, diff_frequency)
 
 
 def save_preference(message_id, preferred, rejected):
@@ -117,8 +118,30 @@ def save_preference(message_id, preferred, rejected):
     st.session_state.pref_data.append(data)
 
 
+def create_sidebar():
+    st.sidebar.header("Settings")
+
+    model = st.sidebar.selectbox(
+        label="Model",
+        options=["gpt-4o-mini", "claude-3.5"],
+        index=0,
+    )
+
+    diff_frequency = st.sidebar.slider(
+        label="Difference Frequency",
+        min_value=0.0,
+        max_value=1.0,
+        value=0.4,
+        help="How often model to show comparison responses.",
+    )
+
+    return model, diff_frequency
+
+
 def main():
     st.set_page_config(page_title="Peony Chat")
+
+    model, diff_frequency = create_sidebar()
 
     # Custom CSS combining both styles
     st.markdown(
@@ -258,6 +281,7 @@ def main():
                 placeholder="Type your message here...",
                 key="user_input",
                 on_submit=handle_input,
+                args=(model, diff_frequency),
             )
 
 
