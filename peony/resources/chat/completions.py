@@ -1,10 +1,10 @@
 import json
 import random
-from typing import Dict, Iterable, List, Optional, Union
+from typing import Dict, List, Optional, Union
 
+import helper
 import litellm
 from pydantic import BaseModel
-from typing_extensions import Literal
 
 from peony.internal import prompt
 
@@ -12,15 +12,6 @@ from peony.internal import prompt
 class ExtractModel(BaseModel):
     main_answer: str
     key_points: str
-
-
-class PreferenceModel(BaseModel):
-    first_response: str
-    second_response: str | None
-
-
-class ResponseModel(BaseModel):
-    first_response: str
 
 
 class Completions:
@@ -59,15 +50,13 @@ class Completions:
         base_url: Optional[str] = None,
         api_version: Optional[str] = None,
         api_key: Optional[str] = None,
-        model_list: Optional[list] = None,  # pass in a list of api_base,keys, etc.
+        model_list: Optional[list] = None,
         # diff frequency threshold
         diff_frequency: Optional[float] = 0.0,
         # Optional liteLLM function params
         **kwargs,
     ):
-        if random.random() < diff_frequency:
-            print("preference")
-
+        if helper.should_run(diff_frequency):
             core_response = litellm.completion(
                 model=model,
                 messages=[
@@ -79,6 +68,7 @@ class Completions:
             )
 
             core_content = json.loads(core_response.choices[0].message.content)
+            original_prompt = messages[0]["content"]
 
             pref_response = litellm.completion(
                 model=model,
@@ -86,13 +76,15 @@ class Completions:
                     {
                         "role": "system",
                         "content": prompt.PREF_PROMPT.format(
-                            core_content["main_answer"], core_content["key_points"]
+                            original_prompt,
+                            core_content["main_answer"],
+                            core_content["key_points"],
                         ),
                     },
                     *messages[1:],
                 ],
                 drop_params=True,
-                response_format=PreferenceModel,
+                response_format=response_format,
                 temperature=1.0,
                 presence_penalty=0.6,
                 frequency_penalty=0.6,
@@ -140,7 +132,7 @@ class Completions:
             frequency_penalty=frequency_penalty,
             logit_bias=logit_bias,
             user=user,
-            response_format=response_format or ResponseModel,
+            response_format=response_format,
             seed=seed,
             tools=tools,
             tool_choice=tool_choice,
