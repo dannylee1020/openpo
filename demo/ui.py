@@ -6,20 +6,28 @@ import streamlit as st
 from pydantic import BaseModel
 
 from peony.adapters import postgres as pg
-from peony.client import CustomClient
+from peony.client import Peony
 
-client = CustomClient()
-pClient = pg.PostgresAdapter(
-    host="postgres_dev",
-    dbname="postgres",
-    user="postgres",
-    pw="postgres",
-    port="5432",
-)
 
-PROMPT = (
-    "Answer user questions with clear answer. Make your answer short but good quality."
-)
+class PreferenceModel(BaseModel):
+    first_response: str
+    second_response: str | None
+
+
+client = Peony()
+# pClient = pg.PostgresAdapter(
+#     host="postgres_dev",
+#     dbname="postgres",
+#     user="postgres",
+#     pw="postgres",
+#     port="5432",
+# )
+
+
+PROMPT = """
+Answer user questions with clear answer.
+Make your answer short but good quality.
+"""
 
 
 def init_session_state():
@@ -76,12 +84,13 @@ def process_messages(messages, model, diff_frequency):
                     *st.session_state.context,
                     {"role": "user", "content": last_message["content"]},
                 ],
+                response_format=PreferenceModel,
                 diff_frequency=diff_frequency,
             )
 
             res = json.loads(response.choices[0].message.content)
             first_res = res["first_response"]
-            second_res = res["second_response"] if len(res.keys()) > 1 else None
+            second_res = res["second_response"]
 
         add_message("assistant", first_res, alt_content=second_res)
 
@@ -245,10 +254,10 @@ def main():
                                     last_msg["alt_content"],
                                 )
 
-                                pClient.save_feedback(
-                                    table="preference",
-                                    data=st.session_state.pref_data,
-                                )
+                                # pClient.save_feedback(
+                                #     table="preference",
+                                #     data=st.session_state.pref_data,
+                                # )
 
                         with col2:
                             st.markdown("### Response B")
@@ -268,10 +277,10 @@ def main():
                                     last_msg["content"],
                                 )
 
-                                pClient.save_feedback(
-                                    table="preference",
-                                    data=st.session_state.pref_data,
-                                )
+                                # pClient.save_feedback(
+                                #     table="preference",
+                                #     data=st.session_state.pref_data,
+                                # )
 
                     else:
                         with st.chat_message("assistant"):
