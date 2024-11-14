@@ -15,13 +15,13 @@ class PreferenceModel(BaseModel):
 
 
 client = Peony()
-# pClient = pg.PostgresAdapter(
-#     host="postgres_dev",
-#     dbname="postgres",
-#     user="postgres",
-#     pw="postgres",
-#     port="5432",
-# )
+pClient = pg.PostgresAdapter(
+    host="postgres_dev",
+    dbname="postgres",
+    user="postgres",
+    pw="postgres",
+    port="5432",
+)
 
 
 PROMPT = """
@@ -254,10 +254,10 @@ def main():
                                     last_msg["alt_content"],
                                 )
 
-                                # pClient.save_feedback(
-                                #     table="preference",
-                                #     data=st.session_state.pref_data,
-                                # )
+                                pClient.save_feedback(
+                                    table="preference",
+                                    data=st.session_state.pref_data,
+                                )
 
                         with col2:
                             st.markdown("### Response B")
@@ -277,10 +277,10 @@ def main():
                                     last_msg["content"],
                                 )
 
-                                # pClient.save_feedback(
-                                #     table="preference",
-                                #     data=st.session_state.pref_data,
-                                # )
+                                pClient.save_feedback(
+                                    table="preference",
+                                    data=st.session_state.pref_data,
+                                )
 
                     else:
                         with st.chat_message("assistant"):

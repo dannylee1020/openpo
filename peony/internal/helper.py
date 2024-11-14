@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 
 
 def should_run(prob: float) -> bool:

@@ -2,11 +2,10 @@ import json
 import random
 from typing import Dict, List, Optional, Union
 
-import helper
 import litellm
 from pydantic import BaseModel
 
-from peony.internal import prompt
+from peony.internal import helper, prompt
 
 
 class ExtractModel(BaseModel):
