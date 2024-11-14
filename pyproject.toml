@@ -1,21 +1,18 @@
 [tool.poetry]
 name = "peony"
 version = "0.1.0"
-description = ""
+description = "Preference Optimization made easy"
 authors = ["Daniel Lee <dannylee1020@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
 python = ">=3.12,<3.13"
-httpx = "^0.27.2"
-typing-extensions = "4.11.0"
 pydantic = "^2.9.2"
 litellm = "^1.52.0"
 
 
 [tool.poetry.group.dev.dependencies]
 boto3 = "^1.35.57"
-mysql-connector-python = "^9.1.0"
 psycopg = {extras = ["binary"], version = "^3.2.1"}
 streamlit = "^1.39.0"
 
