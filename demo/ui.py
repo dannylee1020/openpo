@@ -14,6 +14,11 @@ class PreferenceModel(BaseModel):
     second_response: str | None
 
 
+MODEL_MAPPING = {
+    "gpt-4o": "openai/gpt-4o-mini",
+    "claude-3.5": "anthropic/claude-3-5-sonnet-20240620",
+}
+
 client = Peony()
 pClient = pg.PostgresAdapter(
     host="postgres_dev",
@@ -79,7 +84,7 @@ def process_messages(messages, model, diff_frequency):
 
         with st.spinner(text="model processing message..."):
             response = client.chat.completions.create_preference(
-                model=model,
+                model=MODEL_MAPPING[model],
                 messages=[
                     *st.session_state.context,
                     {"role": "user", "content": last_message["content"]},
@@ -132,7 +137,7 @@ def create_sidebar():
 
     model = st.sidebar.selectbox(
         label="Model",
-        options=["gpt-4o-mini", "claude-3.5"],
+        options=["gpt-4o", "claude-3.5"],
         index=0,
     )
 
