@@ -6,7 +6,7 @@ authors = ["Daniel Lee <dannylee1020@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.12,<3.13"
+python = ">=3.12"
 pydantic = "^2.9.2"
 litellm = "^1.52.0"
 
@@ -19,3 +19,4 @@ streamlit = "^1.39.0"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
