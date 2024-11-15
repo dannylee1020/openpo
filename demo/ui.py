@@ -8,16 +8,22 @@ from pydantic import BaseModel
 from peony.adapters import postgres as pg
 from peony.client import Peony
 
+MODEL_MAPPING = {
+    "gpt-4o": "openai/gpt-4o-mini",
+    "claude-3.5-sonnet": "anthropic/claude-3-5-sonnet-20240620",
+}
+
+
+PROMPT = """
+Answer user questions with clear answer.
+Make your answer short but good quality.
+"""
+
 
 class PreferenceModel(BaseModel):
     first_response: str
     second_response: str | None
 
-
-MODEL_MAPPING = {
-    "gpt-4o": "openai/gpt-4o-mini",
-    "claude-3.5": "anthropic/claude-3-5-sonnet-20240620",
-}
 
 client = Peony()
 pClient = pg.PostgresAdapter(
@@ -27,12 +33,6 @@ pClient = pg.PostgresAdapter(
     pw="postgres",
     port="5432",
 )
-
-
-PROMPT = """
-Answer user questions with clear answer.
-Make your answer short but good quality.
-"""
 
 
 def init_session_state():
@@ -137,7 +137,7 @@ def create_sidebar():
 
     model = st.sidebar.selectbox(
         label="Model",
-        options=["gpt-4o", "claude-3.5"],
+        options=["gpt-4o", "claude-3.5-sonnet"],
         index=0,
     )
 
