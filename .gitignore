@@ -4,3 +4,5 @@ __pycache__
 .python-version
 .venv
 test.py
+dist/
+test_env/
