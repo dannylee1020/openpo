@@ -13,9 +13,9 @@ RUN pip install --upgrade pip && \
     poetry config virtualenvs.create false && \
     poetry install --no-root
 
-RUN mkdir /app/peony
+RUN mkdir /app/openpo
 
-COPY ./peony /app/peony
+COPY ./openpo /app/openpo
 COPY ./demo/ui.py .
 EXPOSE 8501
 

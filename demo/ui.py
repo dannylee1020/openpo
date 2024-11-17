@@ -5,8 +5,8 @@ from datetime import datetime
 import streamlit as st
 from pydantic import BaseModel
 
-from peony.adapters import postgres as pg
-from peony.client import Peony
+from openpo.adapters import postgres as pg
+from openpo.client import OpenPO
 
 MODEL_MAPPING = {
     "gpt-4o": "openai/gpt-4o-mini",
@@ -22,17 +22,18 @@ Make your answer short but good quality.
 
 class PreferenceModel(BaseModel):
     first_response: str
-    second_response: str | None
+    second_response: Optional[str] = None
 
 
-client = Peony()
-pClient = pg.PostgresAdapter(
+postgres = pg.PostgresAdapter(
     host="postgres_dev",
     dbname="postgres",
     user="postgres",
     pw="postgres",
     port="5432",
 )
+
+client = OpenPO(storage=postgres)
 
 
 def init_session_state():
@@ -153,7 +154,7 @@ def create_sidebar():
 
 
 def main():
-    st.set_page_config(page_title="Peony Chat")
+    st.set_page_config(page_title="OpenPO Chat")
 
     model, diff_frequency = create_sidebar()
 
@@ -198,7 +199,7 @@ def main():
     # Main container
     with st.container():
         st.markdown('<div class="main-content">', unsafe_allow_html=True)
-        st.title("Peony Chat 🌸")
+        st.title("OpenPO Chat ⚡️")
         # Messages container
         with st.container():
             st.markdown('<div class="main-container">', unsafe_allow_html=True)
@@ -259,8 +260,8 @@ def main():
                                     last_msg["alt_content"],
                                 )
 
-                                pClient.save_feedback(
-                                    table="preference",
+                                client.save_feedback(
+                                    dest="preference",
                                     data=st.session_state.pref_data,
                                 )
 
@@ -282,8 +283,8 @@ def main():
                                     last_msg["content"],
                                 )
 
-                                pClient.save_feedback(
-                                    table="preference",
+                                client.save_feedback(
+                                    dest="preference",
                                     data=st.session_state.pref_data,
                                 )
 
