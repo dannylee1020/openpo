@@ -4,7 +4,7 @@ Streamline LLM Preference Optimization through effortless user feedback collecti
 ![Demo](./demo/demo.gif)
 
 ## What is OpenPO?
-OpenPO is a lightweight Python package that simplifies the process of collecting, managing, and leveraging user preferences for LLM preference optimization. By automating the comparison of different LLM outputs and gathering user feedback, Peony helps developers build better, more fine-tuned language models with minimal effort.
+OpenPO is a lightweight Python package that simplifies the process of collecting, managing, and leveraging user preferences for LLM preference optimization. By automating the comparison of different LLM outputs and gathering user feedback, OpenPO helps developers build better, more fine-tuned language models with minimal effort.
 
 ## Key Features
 
@@ -17,7 +17,7 @@ OpenPO is a lightweight Python package that simplifies the process of collecting
 - 🎯 **Fine-tuning Ready**: Structured data output ready for immediate model fine-tuning
 
 ## Installation
-PeonyAI uses pip for installation. Run the following command to install Peony in your terminal:
+OpenPO uses pip for installation. Run the following command to install OpenPO in your terminal:
 
 ```bash
 pip install openpo
