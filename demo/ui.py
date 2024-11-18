@@ -1,6 +1,7 @@
 import json
 import uuid
 from datetime import datetime
+from typing import Optional
 
 import streamlit as st
 from pydantic import BaseModel
@@ -22,8 +23,10 @@ Make your answer short but good quality.
 
 class PreferenceModel(BaseModel):
     first_response: str
-    second_response: Optional[str] = None
+    second_response: str
 
+class ResponseModel(BaseModel):
+    response: str
 
 postgres = pg.PostgresAdapter(
     host="postgres_dev",
@@ -90,15 +93,22 @@ def process_messages(messages, model, diff_frequency):
                     *st.session_state.context,
                     {"role": "user", "content": last_message["content"]},
                 ],
-                response_format=PreferenceModel,
+                response_format=ResponseModel,
+                pref_response_format=PreferenceModel,
                 diff_frequency=diff_frequency,
             )
 
             res = json.loads(response.choices[0].message.content)
-            first_res = res["first_response"]
-            second_res = res["second_response"]
 
-        add_message("assistant", first_res, alt_content=second_res)
+            print(res)
+
+            if len(res.keys()) < 2:
+                res = res['response']
+                add_message("assistant", res)
+            else:
+                first_res = res["first_response"]
+                second_res = res["second_response"]
+                add_message("assistant", first_res, alt_content=second_res)
 
 
 def handle_vote(message_id, preferred):
@@ -154,7 +164,7 @@ def create_sidebar():
 
 
 def main():
-    st.set_page_config(page_title="OpenPO Chat")
+    st.set_page_config(page_title="OpenPO Demo")
 
     model, diff_frequency = create_sidebar()
 
@@ -199,7 +209,7 @@ def main():
     # Main container
     with st.container():
         st.markdown('<div class="main-content">', unsafe_allow_html=True)
-        st.title("OpenPO Chat ⚡️")
+        st.title("OpenPO Demo ⚡️")
         # Messages container
         with st.container():
             st.markdown('<div class="main-container">', unsafe_allow_html=True)
