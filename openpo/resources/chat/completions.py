@@ -4,7 +4,7 @@ from typing import Dict, List, Optional, Union
 
 import litellm
 from pydantic import BaseModel
-from openpo.internal import helper
+from openpo.internal import helper, prompt
 
 
 class ExtractModel(BaseModel):
@@ -49,13 +49,15 @@ class Completions:
         api_version: Optional[str] = None,
         api_key: Optional[str] = None,
         model_list: Optional[list] = None,
-        # diff frequency threshold
+        # params for preference
+        pref_response_format: Optional[dict] = None,
         diff_frequency: Optional[float] = 0.0,
         # Optional liteLLM function params
         **kwargs,
     ):
         if helper.should_run(diff_frequency):
             # For two responses case
+            print("preference")
             core_response = litellm.completion(
                 model=model,
                 messages=[
@@ -82,7 +84,7 @@ class Completions:
                     *messages[1:],
                 ],
                 drop_params=True,
-                response_format=response_format,
+                response_format=pref_response_format,
                 temperature=temperature or 1.0,
                 presence_penalty=presence_penalty or 0.6,
                 frequency_penalty=frequency_penalty or 0.6,
@@ -114,6 +116,7 @@ class Completions:
             return pref_response
 
         # For single response case
+        print("No preference")
         completion = litellm.completion(
             model=model,
             messages=messages,

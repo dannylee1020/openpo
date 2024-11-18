@@ -10,3 +10,9 @@ Answer in your own style.
 vary your language and tone, but do not contradict or add to these core facts.
 Main answer: {}, Key points: {}.
 """
+
+SINGLE_PROMPT = """
+{}
+
+Provide exactly one response.
+"""
