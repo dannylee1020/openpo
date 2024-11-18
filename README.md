@@ -1,4 +1,4 @@
-# OpenPO 🌸
+# OpenPO
 Streamline LLM Preference Optimization through effortless user feedback collection
 
 ![Demo](./demo/demo.gif)
