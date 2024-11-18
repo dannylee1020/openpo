@@ -57,7 +57,6 @@ class Completions:
     ):
         if helper.should_run(diff_frequency):
             # For two responses case
-            print("preference")
             core_response = litellm.completion(
                 model=model,
                 messages=[
@@ -116,7 +115,6 @@ class Completions:
             return pref_response
 
         # For single response case
-        print("No preference")
         completion = litellm.completion(
             model=model,
             messages=messages,
