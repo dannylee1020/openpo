@@ -1,4 +1,5 @@
 import json
+import os
 import uuid
 from datetime import datetime
 from typing import Optional
@@ -6,37 +7,29 @@ from typing import Optional
 import streamlit as st
 from pydantic import BaseModel
 
-from openpo.adapters import postgres as pg
 from openpo.client import OpenPO
+from openpo.internal import helper
 
 MODEL_MAPPING = {
-    "gpt-4o": "openai/gpt-4o-mini",
-    "claude-3.5-sonnet": "anthropic/claude-3-5-sonnet-20240620",
+    "Llama-3.2-3B-Instruct": "meta-llama/Llama-3.2-3B-Instruct",
+    "Mistral-7B-Instruct-v0.3": "mistralai/Mistral-7B-Instruct-v0.3",
 }
-
 
 PROMPT = """
 Answer user questions with clear answer.
-Make your answer short but good quality.
+Make your answer short and to the point.
 """
 
-
-class PreferenceModel(BaseModel):
-    first_response: str
-    second_response: str
 
 class ResponseModel(BaseModel):
     response: str
 
-postgres = pg.PostgresAdapter(
-    host="postgres_dev",
-    dbname="postgres",
-    user="postgres",
-    pw="postgres",
-    port="5432",
-)
 
-client = OpenPO(storage=postgres)
+client = OpenPO(api_key=os.getenv("HF_API_KEY"))
+# client = OpenPO(
+#     base_url="https://openrouter.ai/api/v1/chat/completions",
+#     api_key=os.getenv("OPENROUTER_API_KEY"),
+# )
 
 
 def init_session_state():
@@ -91,24 +84,26 @@ def process_messages(messages, model, diff_frequency):
                 model=MODEL_MAPPING[model],
                 messages=[
                     *st.session_state.context,
-                    {"role": "user", "content": last_message["content"]},
                 ],
                 response_format=ResponseModel,
-                pref_response_format=PreferenceModel,
                 diff_frequency=diff_frequency,
+                max_tokens=1000,
             )
 
-            res = json.loads(response.choices[0].message.content)
+            print(response)
 
-            print(res)
-
-            if len(res.keys()) < 2:
-                res = res['response']
-                add_message("assistant", res)
+            if isinstance(response, list):
+                first_res = json.loads(response[0].choices[0].message.content)
+                second_res = json.loads(response[1].choices[0].message.content)
+                add_message(
+                    "assistant",
+                    first_res["response"],
+                    alt_content=second_res["response"],
+                )
             else:
-                first_res = res["first_response"]
-                second_res = res["second_response"]
-                add_message("assistant", first_res, alt_content=second_res)
+                content = json.loads(response.choices[0].message.content)
+                content_res = content["response"]
+                add_message("assistant", content_res)
 
 
 def handle_vote(message_id, preferred):
@@ -148,7 +143,7 @@ def create_sidebar():
 
     model = st.sidebar.selectbox(
         label="Model",
-        options=["gpt-4o", "claude-3.5-sonnet"],
+        options=["Mistral-7B-Instruct-v0.3", "Llama-3.2-3B-Instruct"],
         index=0,
     )
 
@@ -270,11 +265,6 @@ def main():
                                     last_msg["alt_content"],
                                 )
 
-                                client.save_feedback(
-                                    dest="preference",
-                                    data=st.session_state.pref_data,
-                                )
-
                         with col2:
                             st.markdown("### Response B")
 
@@ -292,12 +282,6 @@ def main():
                                     last_msg["alt_content"],
                                     last_msg["content"],
                                 )
-
-                                client.save_feedback(
-                                    dest="preference",
-                                    data=st.session_state.pref_data,
-                                )
-
                     else:
                         with st.chat_message("assistant"):
                             st.markdown(last_msg["content"])
