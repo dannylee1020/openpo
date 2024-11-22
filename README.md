@@ -70,6 +70,20 @@ response = client.chat.completions.create_preference(
 print(response.choices[0].message.content)
 ```
 
+You can pass in a dictionary to `pref_params` argument to control the randomness of a second response when comparison logic is called. Currently supported parameters are: `temperature`, `frequency_penalty` and `presence_penalty`.
+
+```python
+response = client.chat.completions.create_preference(
+    model="anthropic/claude-3.5-sonnet:beta",
+    message=[
+        {"role": "system", "content": PROMPT},
+        {"role": "user", "content": MESSAGE},
+    ],
+    diff_frequency=0.5,
+    pref_params={"temperature": 1.5, "frequency_penalty": 0.5},
+)
+```
+
 ### With Storage Adapter
 Client can be initialized with a storage adapter to save preference data in a datastore.
 
@@ -96,9 +110,9 @@ client.save_feedback(dest='destination', data=preference)
 OpenPO supports structured outputs using Pydantic model.
 
 > [!NOTE]
-> OpenRouter does not natively support structured outputs. This leads to inconsistent behavior from  when structured output is used with OpenRouter.
+> OpenRouter does not natively support structured outputs. This leads to inconsistent behavior from some models when structured output is used with OpenRouter.
 >
-> It is recommended to default to HuggingFace models when structured output is used.
+> It is recommended to default to HuggingFace models or OpenAI and Anthropic models on OpenRouter when structured output is used.
 
 
 ```python
@@ -107,12 +121,9 @@ from openpo.client import OpenPO
 
 client = OpenPO(api_key="your-huggingface-api-key")
 
-class SingleResponse(BaseModel):
+class ResponseModel(BaseModel):
     response: str
 
-class PreferenceResponse(BaseModel):
-    first_response:str
-    second_response:str
 
 res = client.chat.completions.create_preference(
     model='mistralai/Mixtral-8x7B-Instruct-v0.1',
@@ -121,8 +132,7 @@ res = client.chat.completions.create_preference(
         {"role": "system", "content": MESSAGE},
     ],
     diff_frequency=0.5,
-    response_format=SingleResponse, # defines structure for a single response
-    pref_response_format=PreferenceResponse, # defines structure for comparing responses.
+    response_format=ResponseModel,
 )
 
 print(res.choices[0].message.content)
