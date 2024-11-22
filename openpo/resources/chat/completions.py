@@ -1,6 +1,5 @@
 import asyncio
 import json
-from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Union
 
@@ -76,24 +75,28 @@ class Completions:
             raise APIError(f"Request failed: {str(e)}")
 
     async def _concurrent_preference_calls(
-        self, pref_params: Dict[str, Any]
+        self,
+        params: Dict[str, Any],
+        pref_params: Optional[Dict],
     ) -> tuple[ChatCompletionOutput, ChatCompletionOutput]:
         """Make two concurrent preference API calls with the same parameters"""
 
-        pref_task1 = self._make_async_api_request(
-            self.base_url, json.dumps(pref_params)
-        )
+        pref_task1 = self._make_async_api_request(self.base_url, json.dumps(params))
 
-        pref_params["temperature"] = 0.5
-        pref_params["frequency_penalty"] = 0.3
-        pref_task2 = self._make_async_api_request(
-            self.base_url, json.dumps(pref_params)
-        )
+        # update to custom values
+        params["temperature"] = pref_params.get("temperature", 1.5)
+        params["frequency_penalty"] = pref_params.get("frequency_penalty", 0.5)
+        params["presence_penalty"] = pref_params.get("presence_penalty", 0.3)
+        pref_task2 = self._make_async_api_request(self.base_url, json.dumps(params))
         pref_result1, pref_result2 = await asyncio.gather(pref_task1, pref_task2)
         return pref_result1, pref_result2
 
     async def _concurrent_hf_preference_calls(
-        self, model: str, messages: List[Dict[str, str]], **kwargs
+        self,
+        model: str,
+        messages: List[Dict[str, str]],
+        kwargs: Dict[str, str],
+        pref_params: Optional[Dict] = None,
     ) -> tuple[Any, Any]:
         """Make two concurrent HuggingFace preference API calls"""
 
@@ -102,17 +105,15 @@ class Completions:
             messages=messages,
             **kwargs,
         )
+        if pref_params:
+            kwargs["temperature"] = pref_params.get("temperature", 1.2)
+            kwargs["frequency_penalty"] = pref_params.get("frequency_penalty", 0.0)
+            kwargs["presence_penalty"] = pref_params.get("presence_penalty", 0.0)
 
         task2 = self.async_client.chat_completion(
             model=model,
             messages=messages,
-            temperature=1.4,
-            frequency_penalty=0.3,
-            **{
-                k: v
-                for k, v in kwargs.items()
-                if k != "temperature" and k != "frequency_penalty"
-            },
+            **kwargs,
         )
 
         # Run tasks concurrently
@@ -141,6 +142,7 @@ class Completions:
         tool_choice: Optional[str] = None,
         tool_prompt: Optional[str] = None,
         tools: Optional[List[dict]] = None,
+        pref_params: Optional[dict] = {},
     ):
         """
         Conditionally outputs two responses for human preference based on diff_frequency parameter.
@@ -176,7 +178,8 @@ class Completions:
                     self._concurrent_hf_preference_calls(
                         model=model,
                         messages=messages,
-                        **params,
+                        pref_params=pref_params,
+                        kwargs=params,
                     )
                 )
                 return [res_1, res_2]
