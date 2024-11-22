@@ -28,7 +28,10 @@ class OpenPO:
                 "headers": {"Authorization": f"Bearer {self.api_key}"},
             }
         else:
-            self.client = InferenceClient(api_key=self.api_key)
+            self.client = {
+                "inference_client": InferenceClient(api_key=self.api_key),
+                "api_key": self.api_key,
+            }
 
         # Initialize chat resource
         self.chat = chat.Chat(self.client)
