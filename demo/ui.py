@@ -11,7 +11,7 @@ from openpo.client import OpenPO
 from openpo.internal import helper
 
 MODEL_MAPPING = {
-    "Llama-3.2-3B-Instruct": "meta-llama/Llama-3.2-3B-Instruct",
+    "Qwen2.5-1.5B-Instruct": "Qwen/Qwen2.5-1.5B-Instruct",
     "Mistral-7B-Instruct-v0.3": "mistralai/Mistral-7B-Instruct-v0.3",
 }
 
@@ -26,10 +26,6 @@ class ResponseModel(BaseModel):
 
 
 client = OpenPO(api_key=os.getenv("HF_API_KEY"))
-# client = OpenPO(
-#     base_url="https://openrouter.ai/api/v1/chat/completions",
-#     api_key=os.getenv("OPENROUTER_API_KEY"),
-# )
 
 
 def init_session_state():
@@ -143,7 +139,7 @@ def create_sidebar():
 
     model = st.sidebar.selectbox(
         label="Model",
-        options=["Mistral-7B-Instruct-v0.3", "Llama-3.2-3B-Instruct"],
+        options=list(MODEL_MAPPING.keys()),
         index=0,
     )
 
