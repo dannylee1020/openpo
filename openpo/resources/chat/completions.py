@@ -84,9 +84,9 @@ class Completions:
         pref_task1 = self._make_async_api_request(self.base_url, json.dumps(params))
 
         # update to custom values
-        params["temperature"] = pref_params.get("temperature", 1.5)
-        params["frequency_penalty"] = pref_params.get("frequency_penalty", 0.5)
-        params["presence_penalty"] = pref_params.get("presence_penalty", 0.3)
+        params["temperature"] = pref_params.get("temperature", 1.2)
+        params["frequency_penalty"] = pref_params.get("frequency_penalty", 0.0)
+        params["presence_penalty"] = pref_params.get("presence_penalty", 0.0)
         pref_task2 = self._make_async_api_request(self.base_url, json.dumps(params))
         pref_result1, pref_result2 = await asyncio.gather(pref_task1, pref_task2)
         return pref_result1, pref_result2
