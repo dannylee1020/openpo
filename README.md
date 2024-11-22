@@ -9,7 +9,7 @@ OpenPO is an open source library that simplifies the process of collecting, mana
 ## Key Features
 
 
-- 🔌 **Multiple LLM Support**: Works with HuggingFace and OpenRouter out of the box
+- 🔌 **Multiple LLM Support**: Call LLMs from HuggingFace and OpenRouter
 
 - 🤝 **OpenAI API Compatibility**: Seamlessly integrate with OpenAI-style client APIs
 
@@ -94,6 +94,12 @@ client.save_feedback(dest='destination', data=preference)
 
 ## Structured Outputs (JSON Mode)
 OpenPO supports structured outputs using Pydantic model.
+
+> [!NOTE]
+> OpenRouter does not natively support structured outputs. This leads to inconsistent behavior from  when structured output is used with OpenRouter.
+>
+> It is recommended to default to HuggingFace models when structured output is used.
+
 
 ```python
 from pydantic import BaseModel
