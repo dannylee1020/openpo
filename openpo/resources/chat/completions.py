@@ -1,20 +1,16 @@
+import asyncio
 import json
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Union
 
 import httpx
-from huggingface_hub import InferenceClient
+from huggingface_hub import AsyncInferenceClient, InferenceClient
 from pydantic import BaseModel
 
 from openpo.internal import helper, prompt
 from openpo.internal.error import APIError
 from openpo.internal.response import ChatCompletionOutput
-
-
-class ExtractModel(BaseModel):
-    main_answer: str
-    key_points: str
 
 
 class Completions:
@@ -25,17 +21,16 @@ class Completions:
         Args:
             client: Either a HuggingFace InferenceClient instance or a dictionary containing custom API configuration
         """
-        if isinstance(client, InferenceClient):
-            self.client = client
+        if not client.get("base_url", ""):
+            self.client = client["inference_client"]
+            self.async_client = AsyncInferenceClient(api_key=client["api_key"])
             self.custom_api = False
-        elif isinstance(client, dict):
+        elif client.get("base_url", ""):
             self.base_url = client["base_url"]
             self.headers = client["headers"]
             self.custom_api = True
         else:
-            raise ValueError(
-                "Client must be either InferenceClient or a configuration dictionary"
-            )
+            raise ValueError("Client not initialized correctly.")
 
     def _make_api_request(
         self, endpoint: str, params: Dict[str, Any]
@@ -59,6 +54,71 @@ class Completions:
         except httpx.RequestError as e:
             raise APIError(f"Request failed: {str(e)}")
 
+    async def _make_async_api_request(
+        self, endpoint: str, params: Dict[str, Any]
+    ) -> ChatCompletionOutput:
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    endpoint, headers=self.headers, data=params, timeout=30.0
+                )
+                response.raise_for_status()
+                return ChatCompletionOutput(response.json())
+
+        except httpx.HTTPStatusError as e:
+            raise APIError(
+                f"API request failed: {str(e)}",
+                status_code=e.response.status_code,
+                response=e.response.json() if e.response.content else None,
+            )
+
+        except httpx.RequestError as e:
+            raise APIError(f"Request failed: {str(e)}")
+
+    async def _concurrent_preference_calls(
+        self, pref_params: Dict[str, Any]
+    ) -> tuple[ChatCompletionOutput, ChatCompletionOutput]:
+        """Make two concurrent preference API calls with the same parameters"""
+
+        pref_task1 = self._make_async_api_request(
+            self.base_url, json.dumps(pref_params)
+        )
+
+        pref_params["temperature"] = 0.5
+        pref_params["frequency_penalty"] = 0.3
+        pref_task2 = self._make_async_api_request(
+            self.base_url, json.dumps(pref_params)
+        )
+        pref_result1, pref_result2 = await asyncio.gather(pref_task1, pref_task2)
+        return pref_result1, pref_result2
+
+    async def _concurrent_hf_preference_calls(
+        self, model: str, messages: List[Dict[str, str]], **kwargs
+    ) -> tuple[Any, Any]:
+        """Make two concurrent HuggingFace preference API calls"""
+
+        task1 = self.async_client.chat_completion(
+            model=model,
+            messages=messages,
+            **kwargs,
+        )
+
+        task2 = self.async_client.chat_completion(
+            model=model,
+            messages=messages,
+            temperature=1.4,
+            frequency_penalty=0.3,
+            **{
+                k: v
+                for k, v in kwargs.items()
+                if k != "temperature" and k != "frequency_penalty"
+            },
+        )
+
+        # Run tasks concurrently
+        result1, result2 = await asyncio.gather(task1, task2)
+        return result1, result2
+
     def create_preference(
         self,
         *,
@@ -69,10 +129,8 @@ class Completions:
         logit_bias: Optional[List[float]] = None,
         logprobs: Optional[bool] = None,
         max_tokens: Optional[int] = None,
-        n: Optional[int] = None,
         presence_penalty: Optional[float] = None,
         response_format: Optional[dict] = None,
-        pref_response_format: Optional[dict] = None,
         seed: Optional[int] = None,
         stop: Optional[int] = None,
         stream: Optional[bool] = False,
@@ -90,191 +148,22 @@ class Completions:
         """
 
         if not self.custom_api:
-            if helper.should_run(diff_frequency):
-                # Extract key points and main answer
-                res = self.client.chat_completion(
-                    model=model,
-                    messages=[
-                        {"role": "system", "content": prompt.EXTRACT_PROMPT},
-                        *messages[1:],
-                    ],
-                    response_format={
-                        "type": "json",
-                        "value": ExtractModel.model_json_schema(),
-                    },
-                    max_tokens=max_tokens,
-                )
-
-                clean_res = helper.clean_str(res.choices[0].message.content)
-                content = json.loads(clean_res)
-
-                pref_response = self.client.chat_completion(
-                    model=model,
-                    messages=[
-                        {
-                            "role": "system",
-                            "content": prompt.PREF_PROMPT.format(
-                                messages[0]["content"],
-                                content["main_answer"],
-                                content["key_points"],
-                            ),
-                        },
-                        *messages[1:],
-                    ],
-                    response_format=(
-                        {
-                            "type": "json",
-                            "value": pref_response_format.model_json_schema(),
-                        }
-                        if pref_response_format
-                        else None
-                    ),
-                    temperature=temperature or 0.2,
-                    presence_penalty=presence_penalty,
-                    frequency_penalty=frequency_penalty,
-                    logit_bias=logit_bias,
-                    logprobs=logprobs,
-                    max_tokens=max_tokens,
-                    n=n,
-                    seed=seed,
-                    stop=stop,
-                    stream=stream,
-                    stream_options=stream_options,
-                    top_logprobs=top_logprobs,
-                    top_p=top_p,
-                    tool_choice=tool_choice,
-                    tool_prompt=tool_prompt,
-                    tools=tools,
-                )
-
-                return pref_response
-
-            # For single response case
-            completion = self.client.chat_completion(
-                model=model,
-                messages=messages,
-                frequency_penalty=frequency_penalty,
-                logit_bias=logit_bias,
-                logprobs=logprobs,
-                max_tokens=max_tokens,
-                n=n,
-                presence_penalty=presence_penalty,
-                response_format=(
-                    {
-                        "type": "json",
-                        "value": response_format.model_json_schema(),
-                    }
+            params = {
+                "response_format": (
+                    {"type": "json", "value": response_format.model_json_schema()}
                     if response_format
                     else None
                 ),
-                seed=seed,
-                stop=stop,
-                stream=stream,
-                stream_options=stream_options,
-                temperature=temperature,
-                top_logprobs=top_logprobs,
-                top_p=top_p,
-                tool_choice=tool_choice,
-                tool_prompt=tool_prompt,
-                tools=tools,
-            )
-
-            return completion
-
-        else:
-            # Custom API case
-            if helper.should_run(diff_frequency):
-                # First call for extraction
-                extract_params = {
-                    "model": model,
-                    "messages": [
-                        {
-                            "role": "system",
-                            "content": prompt.EXTRACT_PROMPT_JSON.format(
-                                ExtractModel.model_json_schema()["required"]
-                            ),
-                        },
-                        *messages[1:],
-                    ],
-                    "response_format": {"type": "json_object"},
-                    "max_tokens": max_tokens,
-                }
-
-                res = self._make_api_request(self.base_url, json.dumps(extract_params))
-                clean_res = helper.clean_str(res.choices[0].message.content)
-                content = json.loads(clean_res)
-
-                # Second call for preference
-                pref_content = prompt.PREF_PROMPT_JSON.format(
-                    prompt.PREF_PROMPT.format(
-                        messages[0]["content"],
-                        content["main_answer"],
-                        content["key_points"],
-                    ),
-                    (
-                        pref_response_format.model_json_schema()["required"]
-                        if pref_response_format
-                        else ""
-                    ),
-                )
-
-                pref_params = {
-                    "model": model,
-                    "messages": [
-                        {"role": "system", "content": pref_content},
-                        *messages[1:],
-                    ],
-                    "response_format": (
-                        {"type": "json_object"} if pref_response_format else None
-                    ),
-                    "temperature": temperature or 0.2,
-                    "presence_penalty": presence_penalty,
-                    "frequency_penalty": frequency_penalty,
-                    "logit_bias": logit_bias,
-                    "logprobs": logprobs,
-                    "max_tokens": max_tokens,
-                    "n": n,
-                    "seed": seed,
-                    "stop": stop,
-                    "stream": stream,
-                    "stream_options": stream_options,
-                    "top_logprobs": top_logprobs,
-                    "top_p": top_p,
-                    "tool_choice": tool_choice,
-                    "tool_prompt": tool_prompt,
-                    "tools": tools,
-                }
-
-                return self._make_api_request(self.base_url, json.dumps(pref_params))
-
-            # For single response case
-            single_content = prompt.SINGLE_PROMPT_JSON.format(
-                messages[0]["content"],
-                (
-                    response_format.model_json_schema()["required"]
-                    if response_format
-                    else ""
-                ),
-            )
-
-            params = {
-                "model": model,
-                "messages": [
-                    {"role": "system", "content": single_content},
-                    *messages[1:],
-                ],
+                "temperature": temperature,
+                "presence_penalty": presence_penalty,
                 "frequency_penalty": frequency_penalty,
                 "logit_bias": logit_bias,
                 "logprobs": logprobs,
                 "max_tokens": max_tokens,
-                "n": n,
-                "presence_penalty": presence_penalty,
-                "response_format": {"type": "json_object"} if response_format else None,
                 "seed": seed,
                 "stop": stop,
                 "stream": stream,
                 "stream_options": stream_options,
-                "temperature": temperature,
                 "top_logprobs": top_logprobs,
                 "top_p": top_p,
                 "tool_choice": tool_choice,
@@ -282,6 +171,65 @@ class Completions:
                 "tools": tools,
             }
 
+            if helper.should_run(diff_frequency):
+                res_1, res_2 = asyncio.run(
+                    self._concurrent_hf_preference_calls(
+                        model=model,
+                        messages=messages,
+                        **params,
+                    )
+                )
+                return [res_1, res_2]
+
+            # For single response case
+            return self.client.chat_completion(model=model, messages=messages, **params)
+
+        else:
+            # Custom API case
+            if response_format:
+                messages = [
+                    {
+                        "role": "system",
+                        "content": prompt.JSON_PROMPT.format(
+                            messages[0]["content"],
+                            response_format.model_json_schema()["required"],
+                        ),
+                    },
+                    *messages[1:],
+                ]
+
+            params = {
+                "model": model,
+                "messages": messages,
+                "response_format": (
+                    {"type": "json_object"} if response_format else None
+                ),
+                "temperature": temperature,
+                "presence_penalty": presence_penalty,
+                "frequency_penalty": frequency_penalty,
+                "logit_bias": logit_bias,
+                "logprobs": logprobs,
+                "max_tokens": max_tokens,
+                "seed": seed,
+                "stop": stop,
+                "stream": stream,
+                "stream_options": stream_options,
+                "top_logprobs": top_logprobs,
+                "top_p": top_p,
+                "tool_choice": tool_choice,
+                "tool_prompt": tool_prompt,
+                "tools": tools,
+            }
+
+            if helper.should_run(diff_frequency):
+                # Make two concurrent preference calls
+                pref_result1, pref_result2 = asyncio.run(
+                    self._concurrent_preference_calls(params)
+                )
+
+                return [pref_result1, pref_result2]
+
+            # For single response case
             return self._make_api_request(self.base_url, json.dumps(params))
 
     def create(
@@ -309,18 +257,6 @@ class Completions:
     ):
         """
         Create a chat completion using either HuggingFace or custom API.
-
-        Args:
-            model: The model to use for completion
-            messages: The messages to generate completion for
-            ... (other optional parameters)
-
-        Returns:
-            For HuggingFace: Original InferenceClient response (OpenAI format)
-            For custom API: ChatCompletion object with OpenAI-style attributes
-
-        Raises:
-            APIError: If the API request fails
         """
         if not self.custom_api:
             try:
@@ -359,10 +295,16 @@ class Completions:
         else:
             # For custom API, inject schema into prompt if response_format is provided
             if response_format:
-                messages[0]["content"] = prompt.SINGLE_PROMPT_JSON.format(
-                    messages[0]["content"],
-                    response_format.model_json_schema(),
-                )
+                messages = [
+                    {
+                        "role": "system",
+                        "content": prompt.JSON_PROMPT.format(
+                            messages[0]["content"],
+                            response_format.model_json_schema()["required"],
+                        ),
+                    },
+                    *messages[1:],
+                ]
 
             params = {
                 "model": model,
