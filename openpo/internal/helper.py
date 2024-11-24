@@ -51,8 +51,6 @@ def extract_json(text: str) -> Optional[Any]:
             return None
 
         json_str = clean_text(text[start : end + 1])
-        print("json string")
-        print(json_str)
         return json.loads(json_str)
     except json.JSONDecodeError as e:
         raise InvalidJSONFormatError(f"Failed to deserialize JSON: {e}")
