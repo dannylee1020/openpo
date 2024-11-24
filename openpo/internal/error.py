@@ -2,25 +2,32 @@ from typing import Dict, Optional
 
 
 class APIError(Exception):
-    """Custom exception for API-related errors"""
+    """Exception for API-related errors with detailed error information"""
 
     def __init__(
         self,
         message: str,
         status_code: Optional[int] = None,
         response: Optional[Dict] = None,
+        error: Optional[str] = None,
     ):
-        super().__init__(message)
+        self.message = message
         self.status_code = status_code
         self.response = response
+        self.error = error
+
+        super().__init__(message)
 
 
 class JSONExtractionError(Exception):
+    """Base exception for JSON-related errors"""
+
     pass
 
 
 class InvalidJSONFormatError(JSONExtractionError):
-    "Raised when the extracted text is not valid JSON"
+    """Exception raised when the extracted text is not valid JSON"""
 
-    def __init__(self, message=None):
-        super().__init__(message)
+    def __init__(self, message: Optional[str] = None):
+        error_msg = message if message else "The extracted text is not valid JSON"
+        super().__init__(error_msg)
