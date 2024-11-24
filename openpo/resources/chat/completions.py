@@ -16,9 +16,6 @@ class Completions:
     def __init__(self, client: Union[InferenceClient, Dict]):
         """
         Initialize Completions with either HuggingFace InferenceClient or custom API client configuration.
-
-        Args:
-            client: Either a HuggingFace InferenceClient instance or a dictionary containing custom API configuration
         """
         if not client.get("base_url", ""):
             self.client = client["inference_client"]
@@ -29,7 +26,7 @@ class Completions:
             self.headers = client["headers"]
             self.custom_api = True
         else:
-            raise ValueError("Client not initialized correctly.")
+            raise ValueError("Invalid client configuration: Missing required parameters")
 
     def _make_api_request(
         self, endpoint: str, params: Dict[str, Any]
@@ -40,18 +37,19 @@ class Completions:
                     endpoint, headers=self.headers, data=params, timeout=30.0
                 )
                 response.raise_for_status()
-                # Convert custom API response to OpenAI format
+
                 return ChatCompletionOutput(response.json())
 
         except httpx.HTTPStatusError as e:
             raise APIError(
-                f"API request failed: {str(e)}",
+                f"API request to {endpoint} failed",
                 status_code=e.response.status_code,
                 response=e.response.json() if e.response.content else None,
+                error=str(e),
             )
 
         except httpx.RequestError as e:
-            raise APIError(f"Request failed: {str(e)}")
+            raise APIError(f"Network error during API request: {str(e)}", error=str(e))
 
     async def _make_async_api_request(
         self, endpoint: str, params: Dict[str, Any]
@@ -66,21 +64,22 @@ class Completions:
 
         except httpx.HTTPStatusError as e:
             raise APIError(
-                f"API request failed: {str(e)}",
+                f"API request failed",
                 status_code=e.response.status_code,
-                response=e.response.json() if e.response.content else None,
+                response=e.response.json() if e.response.content else None
+                error=str(e),
             )
 
         except httpx.RequestError as e:
-            raise APIError(f"Request failed: {str(e)}")
+            raise APIError(
+                f"Network error during async API request: {str(e)}", error=str(e)
+            )
 
     async def _concurrent_preference_calls(
         self,
         params: Dict[str, Any],
         pref_params: Optional[Dict],
     ) -> tuple[ChatCompletionOutput, ChatCompletionOutput]:
-        """Make two concurrent preference API calls with the same parameters"""
-
         pref_task1 = self._make_async_api_request(self.base_url, json.dumps(params))
 
         # update to custom values
@@ -88,6 +87,7 @@ class Completions:
         params["frequency_penalty"] = pref_params.get("frequency_penalty", 0.0)
         params["presence_penalty"] = pref_params.get("presence_penalty", 0.0)
         pref_task2 = self._make_async_api_request(self.base_url, json.dumps(params))
+
         pref_result1, pref_result2 = await asyncio.gather(pref_task1, pref_task2)
         return pref_result1, pref_result2
 
@@ -98,7 +98,6 @@ class Completions:
         kwargs: Dict[str, str],
         pref_params: Optional[Dict] = None,
     ) -> tuple[Any, Any]:
-        """Make two concurrent HuggingFace preference API calls"""
 
         task1 = self.async_client.chat_completion(
             model=model,
@@ -116,9 +115,10 @@ class Completions:
             **kwargs,
         )
 
-        # Run tasks concurrently
         result1, result2 = await asyncio.gather(task1, task2)
+
         return result1, result2
+
 
     def create_preference(
         self,
@@ -185,8 +185,9 @@ class Completions:
                 return [res_1, res_2]
 
             # For single response case
-            return self.client.chat_completion(model=model, messages=messages, **params)
-
+            return self.client.chat_completion(
+                model=model, messages=messages, **params
+            )
         else:
             # Custom API case
             if response_format:
@@ -227,9 +228,8 @@ class Completions:
             if helper.should_run(diff_frequency):
                 # Make two concurrent preference calls
                 pref_result1, pref_result2 = asyncio.run(
-                    self._concurrent_preference_calls(params)
+                    self._concurrent_preference_calls(params, pref_params)
                 )
-
                 return [pref_result1, pref_result2]
 
             # For single response case
@@ -261,40 +261,38 @@ class Completions:
         """
         Create a chat completion using either HuggingFace or custom API.
         """
+
         if not self.custom_api:
-            try:
-                return self.client.chat_completion(
-                    **{
-                        "model": model,
-                        "messages": messages,
-                        "frequency_penalty": frequency_penalty,
-                        "logit_bias": logit_bias,
-                        "logprobs": logprobs,
-                        "max_tokens": max_tokens,
-                        "n": n,
-                        "presence_penalty": presence_penalty,
-                        "response_format": (
-                            {
-                                "type": "json",
-                                "value": response_format.model_json_schema(),
-                            }
-                            if response_format
-                            else None
-                        ),
-                        "seed": seed,
-                        "stop": stop,
-                        "stream": stream,
-                        "stream_options": stream_options,
-                        "temperature": temperature,
-                        "top_logprobs": top_logprobs,
-                        "top_p": top_p,
-                        "tool_choice": tool_choice,
-                        "tool_prompt": tool_prompt,
-                        "tools": tools,
-                    }
-                )
-            except Exception as e:
-                raise APIError(f"HuggingFace API request failed: {str(e)}")
+            return self.client.chat_completion(
+                **{
+                    "model": model,
+                    "messages": messages,
+                    "frequency_penalty": frequency_penalty,
+                    "logit_bias": logit_bias,
+                    "logprobs": logprobs,
+                    "max_tokens": max_tokens,
+                    "n": n,
+                    "presence_penalty": presence_penalty,
+                    "response_format": (
+                        {
+                            "type": "json",
+                            "value": response_format.model_json_schema(),
+                        }
+                        if response_format
+                        else None
+                    ),
+                    "seed": seed,
+                    "stop": stop,
+                    "stream": stream,
+                    "stream_options": stream_options,
+                    "temperature": temperature,
+                    "top_logprobs": top_logprobs,
+                    "top_p": top_p,
+                    "tool_choice": tool_choice,
+                    "tool_prompt": tool_prompt,
+                    "tools": tools,
+                }
+            )
         else:
             # For custom API, inject schema into prompt if response_format is provided
             if response_format:
