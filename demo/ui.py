@@ -11,7 +11,7 @@ from openpo.client import OpenPO
 from openpo.internal import helper
 
 MODEL_MAPPING = {
-    "Qwen2.5-1.5B-Instruct": "Qwen/Qwen2.5-1.5B-Instruct",
+    "Qwen2.5-Coder-32B-Instruct": "Qwen/Qwen2.5-Coder-32B-Instruct",
     "Mistral-7B-Instruct-v0.3": "mistralai/Mistral-7B-Instruct-v0.3",
 }
 
