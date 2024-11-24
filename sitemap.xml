@@ -1,31 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
-         <loc>https://docs.openpo.com/</loc>
+         <loc>https://docs.openpo.dev/</loc>
          <lastmod>2024-11-24</lastmod>
     </url>
     <url>
-         <loc>https://docs.openpo.com/errors/</loc>
+         <loc>https://docs.openpo.dev/errors/</loc>
          <lastmod>2024-11-24</lastmod>
     </url>
     <url>
-         <loc>https://docs.openpo.com/installation/</loc>
+         <loc>https://docs.openpo.dev/installation/</loc>
          <lastmod>2024-11-24</lastmod>
     </url>
     <url>
-         <loc>https://docs.openpo.com/json/</loc>
+         <loc>https://docs.openpo.dev/json/</loc>
          <lastmod>2024-11-24</lastmod>
     </url>
     <url>
-         <loc>https://docs.openpo.com/parameters/</loc>
+         <loc>https://docs.openpo.dev/parameters/</loc>
          <lastmod>2024-11-24</lastmod>
     </url>
     <url>
-         <loc>https://docs.openpo.com/quickstart/</loc>
+         <loc>https://docs.openpo.dev/quickstart/</loc>
          <lastmod>2024-11-24</lastmod>
     </url>
     <url>
-         <loc>https://docs.openpo.com/storage/</loc>
+         <loc>https://docs.openpo.dev/storage/</loc>
          <lastmod>2024-11-24</lastmod>
     </url>
 </urlset>
