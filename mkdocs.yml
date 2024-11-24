@@ -1,0 +1,44 @@
+site_name: OpenPO Documentation
+site_url: https://docs.openpo.com
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-colors-scheme:dark)"
+      scheme: slate
+      primary: black
+      accent: black
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.sections
+    - search.highlight
+    - content.code.copy
+    - def_list
+
+# Extension for better code blocks, admonitions, etc.
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - pymdownx.inlinehilite
+  - admonition
+  - pymdownx.details
+  - pymdownx.snippets
+
+nav:
+  - Getting Started:
+    - Welcome: index.md
+    - Installation: installation.md
+    - Quick Start: quickstart.md
+    - Structured Output (JSON Mode): json.md
+    - Storage: storage.md
+    - Parameters: parameters.md
+    - Errors: errors.md
