@@ -1,5 +1,6 @@
 site_name: OpenPO Documentation
-site_url: https://docs.openpo.com
+site_url: https://docs.openpo.dev
+site_author: Daniel Lee
 theme:
   name: material
   palette:
