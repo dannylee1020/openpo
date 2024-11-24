@@ -26,7 +26,9 @@ class Completions:
             self.headers = client["headers"]
             self.custom_api = True
         else:
-            raise ValueError("Invalid client configuration: Missing required parameters")
+            raise ValueError(
+                "Invalid client configuration: Missing required parameters"
+            )
 
     def _make_api_request(
         self, endpoint: str, params: Dict[str, Any]
@@ -66,7 +68,7 @@ class Completions:
             raise APIError(
                 f"API request failed",
                 status_code=e.response.status_code,
-                response=e.response.json() if e.response.content else None
+                response=e.response.json() if e.response.content else None,
                 error=str(e),
             )
 
@@ -118,7 +120,6 @@ class Completions:
         result1, result2 = await asyncio.gather(task1, task2)
 
         return result1, result2
-
 
     def create_preference(
         self,
@@ -185,9 +186,7 @@ class Completions:
                 return [res_1, res_2]
 
             # For single response case
-            return self.client.chat_completion(
-                model=model, messages=messages, **params
-            )
+            return self.client.chat_completion(model=model, messages=messages, **params)
         else:
             # Custom API case
             if response_format:
