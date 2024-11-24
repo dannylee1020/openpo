@@ -9,7 +9,7 @@ OpenPO is an open source library that simplifies the process of collecting, mana
 ## Key Features
 
 
-- 🔌 **Multiple LLM Support**: Call LLMs from HuggingFace and OpenRouter
+- 🔌 **Multiple LLM Support**: Call any model from HuggingFace and OpenRouter
 
 - 🤝 **OpenAI API Compatibility**: Seamlessly integrate with OpenAI-style client APIs
 
@@ -26,7 +26,7 @@ pip install openpo
 
 
 ## Getting Started
-By default, OpenPO client utilizes Huggingface's [InferenceClient](https://huggingface.co/docs/huggingface_hub/en/package_reference/inference_client) to call models available on Huggingface Model Hub.
+By default, OpenPO client utilizes HuggingFace's [InferenceClient](https://huggingface.co/docs/huggingface_hub/en/package_reference/inference_client) to call models available on HuggingFace Model Hub.
 
 ```python
 import os
@@ -112,7 +112,7 @@ OpenPO supports structured outputs using Pydantic model.
 > [!NOTE]
 > OpenRouter does not natively support structured outputs. This leads to inconsistent behavior from some models when structured output is used with OpenRouter.
 >
-> It is recommended to default to HuggingFace models or OpenAI and Anthropic models on OpenRouter when structured output is used.
+> It is recommended to use HuggingFace models for structured output.
 
 
 ```python
@@ -134,8 +134,6 @@ res = client.chat.completions.create_preference(
     diff_frequency=0.5,
     response_format=ResponseModel,
 )
-
-print(res.choices[0].message.content)
 ```
 
 
