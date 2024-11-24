@@ -6,14 +6,5 @@ services:
     ports:
       - "8501:8501"
     environment:
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
-  db:
-    image: postgres:latest
-    container_name: postgres_dev
-    environment:
-      POSTGRES_PASSWORD: postgres
-    ports:
-      - 5432:5432
-    volumes:
-      - ./dev_resources/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - HF_API_KEY=${HF_API_KEY}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
