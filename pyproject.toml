@@ -1,20 +1,19 @@
 [tool.poetry]
 name = "openpo"
-version = "0.1.0"
+version = "0.1.4"
 description = "Preference Optimization made easy"
 authors = ["Daniel Lee <dannylee1020@gmail.com>"]
 license = "Apache-2.0"
 keywords = ["llm", "finetuning", "preference optimization, rlhf"]
 include = ["LICENSE", "README.md"]
 repository = "https://github.com/dannylee1020/openpo"
+documentation="https://docs.openpo.dev"
 readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.12"
 pydantic = "^2.9.2"
-litellm = "<=1.52.5"
 boto3 = "^1.35.57"
-psycopg = {extras = ["binary"], version = "^3.2.1"}
 numpy = "^2.1.3"
 huggingface-hub = "^0.26.2"
 httpx = "^0.27.2"
