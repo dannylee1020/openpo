@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "openpo"
-version = "0.1.4"
+version = "0.1.1"
 description = "Preference Optimization made easy"
 authors = ["Daniel Lee <dannylee1020@gmail.com>"]
 license = "Apache-2.0"
@@ -11,7 +11,7 @@ documentation="https://docs.openpo.dev"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = ">=3.10.1"
 pydantic = "^2.9.2"
 boto3 = "^1.35.57"
 numpy = "^2.1.3"

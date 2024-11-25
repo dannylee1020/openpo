@@ -1,28 +1,42 @@
-# OpenPO
-Streamline LLM Preference Optimization through effortless human feedback collection
+# OpenPO 🐼
+[![PyPI version](https://badge.fury.io/py/openpo.svg)](https://badge.fury.io/py/openpo)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Documentation](https://img.shields.io/badge/docs-docs.openpo.dev-blue)](https://docs.openpo.dev)
+![Python Versions](https://img.shields.io/pypi/pyversions/openpo)
+
+
+Streamline LLM Preference Optimization through effortless human feedback collection.
 
 ![Demo](./demo/demo.gif)
+
 
 ## What is OpenPO?
 OpenPO is an open source library that simplifies the process of collecting, managing, and leveraging human feedback for LLM preference optimization. By automating the comparison of different LLM outputs and gathering human feedback, OpenPO helps developers build better, more fine-tuned language models with minimal effort.
 
 ## Key Features
 
-- 🔌 **Multiple LLM Support**: Call any model from HuggingFace and OpenRouter
+- 🔌 **Multiple LLM Support**: Call any model from HuggingFace and OpenRouter, including popular models like GPT, Claude, Llama, and Mixtral
 
-- 🤝 **OpenAI API Compatibility**: Seamlessly integrate with OpenAI-style client APIs
+- 🤝 **OpenAI API Compatibility**: Seamlessly integrate with OpenAI-style client APIs for easy migration and familiar developer experience
 
-- 💾 **Flexible Storage:** Pluggable adapters for your preferred datastore
+- 💾 **Flexible Storage:** Pluggable adapters for your preferred datastore, supporting various data persistence options
 
-- 🎯 **Fine-tuning Ready**: Structured data output ready for immediate model fine-tuning
+- 🎯 **Fine-tuning Ready**: Structured data output ready for immediate model fine-tuning and preference optimization
 
 ## Installation
-OpenPO uses pip for installation. Run the following command to install OpenPO in your terminal:
+### Install from PyPI (recommended)
+OpenPO uses pip for installation. Run the following command in the terminal to install OpenPO:
 
 ```bash
 pip install openpo
 ```
 
+### Install from source
+Clone the repository first then run the follow command
+```bash
+cd openpo
+poetry install
+```
 
 ## Getting Started
 By default, OpenPO client utilizes HuggingFace's [InferenceClient](https://huggingface.co/docs/huggingface_hub/en/package_reference/inference_client) to call models available on HuggingFace Model Hub.
@@ -127,7 +141,6 @@ res = client.chat.completions.create_preference(
     response_format=ResponseModel,
 )
 ```
-
 
 ## Try Out
 `docker compose up --build` to run simple demo of how it works in the UI.
