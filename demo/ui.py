@@ -17,7 +17,7 @@ MODEL_MAPPING = {
 
 PROMPT = """
 Answer user questions with clear answer.
-Make your answer short and to the point.
+Make your answer concise and to the point.
 """
 
 

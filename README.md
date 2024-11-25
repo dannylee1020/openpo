@@ -143,4 +143,9 @@ res = client.chat.completions.create_preference(
 ```
 
 ## Try Out
-`docker compose up --build` to run simple demo of how it works in the UI.
+Set environment variable first
+```bash
+export HF_API_KEY=<your-api-key>
+```
+
+then run `docker compose up --build` to try demo in your localhost.
