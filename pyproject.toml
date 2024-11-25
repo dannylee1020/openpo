@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "openpo"
-version = "0.1.1"
+version = "0.1.2"
 description = "Preference Optimization made easy"
 authors = ["Daniel Lee <dannylee1020@gmail.com>"]
 license = "Apache-2.0"
