@@ -2,7 +2,7 @@
 [![PyPI version](https://badge.fury.io/py/openpo.svg)](https://badge.fury.io/py/openpo)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Documentation](https://img.shields.io/badge/docs-docs.openpo.dev-blue)](https://docs.openpo.dev)
-![Python Versions](https://img.shields.io/pypi/pyversions/openpo)
+![Python](https://img.shields.io/badge/python->=3.10.1-blue.svg)
 
 
 Streamline LLM Preference Optimization through effortless human feedback collection.
