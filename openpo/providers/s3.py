@@ -5,10 +5,8 @@ from typing import Any, Dict, List
 import boto3
 from botocore.exceptions import ClientError
 
-from .base import StorageAdapter
 
-
-class S3Adapter(StorageAdapter):
+class S3Storage:
     def __init__(self, **kwargs):
         """
         Args:
@@ -34,7 +32,7 @@ class S3Adapter(StorageAdapter):
         except ClientError as err:
             raise err
 
-    def save_feedback(
+    def save_data(
         self,
         data: List[Dict[str, Any]],
         bucket: str,
@@ -53,11 +51,11 @@ class S3Adapter(StorageAdapter):
         except ClientError as err:
             raise err
 
-    def get_feedback(self, bucket: str, key: str) -> List[Dict[str, Any]]:
+    def load_data(self, bucket: str, key: str) -> List[Dict[str, Any]]:
         content = self._read_file(bucket, key)
         return content
 
-    def get_feedback_all(self, bucket: str, limit: int):
+    def load_data_all(self, bucket: str, limit: int):
         all_data = []
         files_read = 0
 
