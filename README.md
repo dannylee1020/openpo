@@ -8,7 +8,6 @@ OpenPO is an open source library that simplifies the process of collecting, mana
 
 ## Key Features
 
-
 - 🔌 **Multiple LLM Support**: Call any model from HuggingFace and OpenRouter
 
 - 🤝 **OpenAI API Compatibility**: Seamlessly integrate with OpenAI-style client APIs
@@ -84,26 +83,19 @@ response = client.chat.completions.create_preference(
 )
 ```
 
-### With Storage Adapter
-Client can be initialized with a storage adapter to save preference data in a datastore.
+### With Storage Provider
+Data can be easily saved to a preferred datastore using a storage provider.
 
 ```python
 import os
 from openpo.client import OpenPO
-from openpo.adapters import postgres as pg
+from openpo.providers.huggingface import HuggingFaceStorage
 
-pg_adapter = pg.PostgresAdapter(
-    host=host,
-    dbname=dbname,
-    port=port,
-    user=user,
-    pw=pw
-)
+storage = HuggingFaceStorage(repo_id="my-dataset-repo", api_key="hf-token")
+client = OpenPO(api_key="your-huggingface-token")
 
-client = OpenPO(api_key="your-huggingface-token", storage=pg_adapter)
-
-preference = {} # preference data needs to be in the format {"prompt": ..., "preferred": ..., "rejected": ...}
-client.save_feedback(dest='destination', data=preference)
+preference = {} # preference data needs to be in the format {"prompt": ..., "preferred": ..., "rejected": ...} for finetuning
+storage.save_data(data=preference, key="my-data")
 ```
 
 ## Structured Outputs (JSON Mode)
