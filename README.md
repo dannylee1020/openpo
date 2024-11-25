@@ -83,8 +83,8 @@ response = client.chat.completions.create_preference(
 )
 ```
 
-### With Storage Provider
-Data can be easily saved to a preferred datastore using a storage provider.
+### Saving Data
+Use providers to easily upload and download data.
 
 ```python
 import os
