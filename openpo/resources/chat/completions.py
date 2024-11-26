@@ -1,15 +1,15 @@
 import asyncio
 import json
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, AsyncGenerator, Dict, Generator, List, Optional, Union
 
 import httpx
-from huggingface_hub import AsyncInferenceClient, InferenceClient
+from huggingface_hub import InferenceClient
 from pydantic import BaseModel
 
 from openpo.internal import helper, prompt
-from openpo.internal.error import APIError
-from openpo.internal.response import ChatCompletionOutput
+from openpo.internal.error import APIError, InvalidStreamError
+from openpo.internal.response import ChatCompletionOutput, ChatCompletionStreamOutput
 
 
 class Completions:
@@ -19,7 +19,6 @@ class Completions:
         """
         if not client.get("base_url", ""):
             self.client = client["inference_client"]
-            self.async_client = AsyncInferenceClient(api_key=client["api_key"])
             self.custom_api = False
         elif client.get("base_url", ""):
             self.base_url = client["base_url"]
@@ -32,94 +31,57 @@ class Completions:
 
     def _make_api_request(
         self, endpoint: str, params: Dict[str, Any]
-    ) -> ChatCompletionOutput:
-        try:
-            with httpx.Client() as client:
-                response = client.post(
-                    endpoint, headers=self.headers, data=params, timeout=30.0
+    ) -> Union[ChatCompletionOutput, Generator[ChatCompletionStreamOutput, None, None]]:
+        if params.get("stream", False):
+
+            def stream_generator():
+                with httpx.stream(
+                    method="POST",
+                    url=endpoint,
+                    headers=self.headers,
+                    data=json.dumps(params),
+                    timeout=45.0,
+                ) as response:
+                    response.raise_for_status()
+                    for line in response.iter_lines():
+                        if line:
+                            if not line.startswith("data:"):
+                                return None
+
+                            if "[DONE]" in line:
+                                break
+
+                            chunk = json.loads(line[6:])
+                            try:
+                                yield ChatCompletionStreamOutput(chunk)
+                            except json.JSONDecodeError:
+                                continue
+
+            return stream_generator()
+        else:
+            try:
+                with httpx.Client() as client:
+                    response = client.post(
+                        endpoint,
+                        headers=self.headers,
+                        data=json.dumps(params),
+                        timeout=45.0,
+                    )
+                    response.raise_for_status()
+                    return ChatCompletionOutput(response.json())
+
+            except httpx.HTTPStatusError as e:
+                raise APIError(
+                    f"API request to {endpoint} failed",
+                    status_code=e.response.status_code,
+                    response=e.response.json() if e.response.content else None,
+                    error=str(e),
                 )
-                response.raise_for_status()
 
-                return ChatCompletionOutput(response.json())
-
-        except httpx.HTTPStatusError as e:
-            raise APIError(
-                f"API request to {endpoint} failed",
-                status_code=e.response.status_code,
-                response=e.response.json() if e.response.content else None,
-                error=str(e),
-            )
-
-        except httpx.RequestError as e:
-            raise APIError(f"Network error during API request: {str(e)}", error=str(e))
-
-    async def _make_async_api_request(
-        self, endpoint: str, params: Dict[str, Any]
-    ) -> ChatCompletionOutput:
-        try:
-            async with httpx.AsyncClient() as client:
-                response = await client.post(
-                    endpoint, headers=self.headers, data=params, timeout=30.0
+            except httpx.RequestError as e:
+                raise APIError(
+                    f"Network error during API request: {str(e)}", error=str(e)
                 )
-                response.raise_for_status()
-                return ChatCompletionOutput(response.json())
-
-        except httpx.HTTPStatusError as e:
-            raise APIError(
-                f"API request failed",
-                status_code=e.response.status_code,
-                response=e.response.json() if e.response.content else None,
-                error=str(e),
-            )
-
-        except httpx.RequestError as e:
-            raise APIError(
-                f"Network error during async API request: {str(e)}", error=str(e)
-            )
-
-    async def _concurrent_preference_calls(
-        self,
-        params: Dict[str, Any],
-        pref_params: Optional[Dict],
-    ) -> tuple[ChatCompletionOutput, ChatCompletionOutput]:
-        pref_task1 = self._make_async_api_request(self.base_url, json.dumps(params))
-
-        # update to custom values
-        params["temperature"] = pref_params.get("temperature", 1.2)
-        params["frequency_penalty"] = pref_params.get("frequency_penalty", 0.0)
-        params["presence_penalty"] = pref_params.get("presence_penalty", 0.0)
-        pref_task2 = self._make_async_api_request(self.base_url, json.dumps(params))
-
-        pref_result1, pref_result2 = await asyncio.gather(pref_task1, pref_task2)
-        return pref_result1, pref_result2
-
-    async def _concurrent_hf_preference_calls(
-        self,
-        model: str,
-        messages: List[Dict[str, str]],
-        kwargs: Dict[str, str],
-        pref_params: Optional[Dict] = None,
-    ) -> tuple[Any, Any]:
-
-        task1 = self.async_client.chat_completion(
-            model=model,
-            messages=messages,
-            **kwargs,
-        )
-        if pref_params:
-            kwargs["temperature"] = pref_params.get("temperature", 1.2)
-            kwargs["frequency_penalty"] = pref_params.get("frequency_penalty", 0.0)
-            kwargs["presence_penalty"] = pref_params.get("presence_penalty", 0.0)
-
-        task2 = self.async_client.chat_completion(
-            model=model,
-            messages=messages,
-            **kwargs,
-        )
-
-        result1, result2 = await asyncio.gather(task1, task2)
-
-        return result1, result2
 
     def create_preference(
         self,
@@ -175,14 +137,21 @@ class Completions:
             }
 
             if helper.should_run(diff_frequency):
-                res_1, res_2 = asyncio.run(
-                    self._concurrent_hf_preference_calls(
-                        model=model,
-                        messages=messages,
-                        pref_params=pref_params,
-                        kwargs=params,
-                    )
+                res_1 = self.client.chat_completion(
+                    model=model,
+                    messages=messages,
+                    **params,
                 )
+
+                params["temperature"] = pref_params.get("temperature", 1.3)
+                params["frequency_penalty"] = pref_params.get("frequency_penalty", 0.2)
+
+                res_2 = self.client.chat_completion(
+                    model=model,
+                    messages=messages,
+                    **params,
+                )
+
                 return [res_1, res_2]
 
             # For single response case
@@ -225,14 +194,17 @@ class Completions:
             }
 
             if helper.should_run(diff_frequency):
-                # Make two concurrent preference calls
-                pref_result1, pref_result2 = asyncio.run(
-                    self._concurrent_preference_calls(params, pref_params)
-                )
-                return [pref_result1, pref_result2]
+                res_1 = self._make_api_request(self.base_url, params)
+
+                params["temperature"] = pref_params.get("temperature", 1.3)
+                params["frequency_penalty"] = pref_params.get("frequency_penalty", 0.2)
+
+                res_2 = self._make_api_request(self.base_url, params)
+
+                return [res_1, res_2]
 
             # For single response case
-            return self._make_api_request(self.base_url, json.dumps(params))
+            return self._make_api_request(self.base_url, params)
 
     def create(
         self,
@@ -328,4 +300,4 @@ class Completions:
                 "tools": tools,
             }
 
-            return self._make_api_request(self.base_url, json.dumps(params))
+            return self._make_api_request(self.base_url, params)
