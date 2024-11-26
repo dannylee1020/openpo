@@ -40,6 +40,8 @@ nav:
     - Installation: installation.md
     - Quick Start: quickstart.md
     - Structured Output (JSON Mode): json.md
+    - Preference Response: preference.md
     - Storage: storage.md
     - Parameters: parameters.md
+    - Responses: response.md
     - Errors: errors.md
