@@ -31,3 +31,9 @@ class InvalidJSONFormatError(JSONExtractionError):
     def __init__(self, message: Optional[str] = None):
         error_msg = message if message else "The extracted text is not valid JSON"
         super().__init__(error_msg)
+
+
+class InvalidStreamError(Exception):
+
+    def __init__(self, message: Optional[str] = None):
+        error_msg = message if message else "data not returned from stream"
