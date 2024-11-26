@@ -1,6 +1,6 @@
 # Storage Providers
 
-OpenPO is integrated with S3 and HuggingFace Hub out of the box. Use providers to easily upload and download datasets.
+OpenPO is integrated with S3 and Hugging Face Hub out of the box. Use providers to easily upload and download datasets.
 
 ## Usage
 ```python
@@ -15,7 +15,7 @@ data = storage.load_data(filename="my-data.json")
 print(data)
 ```
 
-## HuggingFace Storage
+## Hugging Face Storage
 
 ### Initialization
 ```python

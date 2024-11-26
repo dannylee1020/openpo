@@ -5,13 +5,13 @@
 ![Python](https://img.shields.io/badge/python->=3.10.1-blue.svg)
 
 
-Streamline LLM Preference Optimization through effortless human feedback collection.
+OpenPO simplifies collecting preference data by generating pairwise responses from 200+ LLMs.
 
 ![Demo](./demo/demo.gif)
 
 
 ## What is OpenPO?
-OpenPO is an open source library that simplifies the process of collecting, managing, and leveraging human feedback for LLM preference optimization. By automating the comparison of different LLM outputs and gathering human feedback, OpenPO helps developers build better, more fine-tuned language models with minimal effort.
+OpenPO is an open source library that simplifies the process of collecting, managing, and leveraging preference data for LLM preference optimization. By automating the comparison of different LLM outputs and gathering human preference, OpenPO helps developers build better, more fine-tuned language models with minimal effort.
 
 ## Key Features
 

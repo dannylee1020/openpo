@@ -1,4 +1,4 @@
-OpenPO conditionally returns two responses based on the value of `diff_frequency` parameter. These outputs can be shown to users to collect preference data that can be used for preference optimization fine-tuning.
+OpenPO conditionally returns two responses based on the value of `diff_frequency` parameter. These outputs can be shown to users to build preference dataset for preference optimization fine-tuning
 
 !!! Note
     OpenPO makes two separate requests to the model, consolidates and returns the response. This will result in more tokens used per request and could incur additional API cost.

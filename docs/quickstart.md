@@ -9,7 +9,7 @@ export OPENROUTER_API_KEY=<your-openrouter-api-key>
 ```
 
 ## Using Hugging Face
-By default, OpenPO client utilizes Hugging Face's [InferenceClient](https://huggingface.co/docs/huggingface_hub/en/package_reference/inference_client) to call models available on Huggingface Model Hub.
+OpenPO client uses Hugging Face's [InferenceClient](https://huggingface.co/docs/huggingface_hub/en/package_reference/inference_client) to call models available on Huggingface Model Hub.
 
 ### Inference API
 
@@ -25,14 +25,14 @@ response = client.chat.completions.create_preference(
         {"role": "system", "content": PROMPT},
         {"role": "system", "content": MESSAGE},
     ],
-    diff_frequency=0.5, # generate preference responses 50% of the time
+    diff_frequency=0.5, # generate pairwise responses 50% of the time
 )
 
 print(res.choices[0].message.content)
 ```
 
 ### Inference Endpoint
-To call models that are deployed to HuggingFace Inference Endpoint, simply pass in the private url to the `model` parameter.
+To call models that are deployed to Hugging Face Inference Endpoint, simply pass in the private url to the `model` parameter.
 
 ```python
 client = OpenPO(api_key=os.getenv("HF_API_KEY"))
@@ -43,12 +43,12 @@ response = client.chat.completions.create_preference(
         {"role": "system", "content": PROMPT},
         {"role": "system", "content": MESSAGE},
     ],
-    diff_frequency=0.5, # generate preference responses 50% of the time
+    diff_frequency=0.5, # generate pairwise responses 50% of the time
 )
 ```
 
 ## Using OpenRouter
-OpenPO supports OpenRouter by making requests to its endpoint
+OpenPO supports OpenRouter by making requests to its endpoint.
 
 ```python
 client = OpenPO(
