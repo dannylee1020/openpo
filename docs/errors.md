@@ -23,3 +23,10 @@ InvalidJSONFormatError(message: Optional[str] = None)
 
 !!! Note
     This error mostly raises when a model fails to follow structure given in  `response_format` and returns a non JSON response. It is recommended to implement a  retry logic to handle model inconsistency.
+
+## InvalidStreamError
+Raised when stream data returned from OpenRouter is not in the right format.
+
+```python
+InvalidStreamError(message: Optional[str] = None):
+```

@@ -1,5 +1,8 @@
 To use structured output, simply pass in pydantic model.
 
+!!! Note
+    Structure Output is not supported with streaming.
+
 ```python
 from pydantic import BaseModel
 from openpo.client import OpenPO

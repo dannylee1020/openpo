@@ -2,6 +2,19 @@
 
 OpenPO is integrated with S3 and HuggingFace Hub out of the box. Use providers to easily upload and download datasets.
 
+## Usage
+```python
+storage = HuggingFaceStorage(repo_id="my-dataset-repo", api_key="hf-token")
+
+# Save data
+preference = {"prompt": "text", "preferred": "response1", "rejected": "response2"}
+storage.save_data(data=preference, filename="my-data.json")
+
+# Load data
+data = storage.load_data(filename="my-data.json")
+print(data)
+```
+
 ## HuggingFace Storage
 
 ### Initialization
@@ -58,15 +71,3 @@ storage = S3Storage(
         - `bucket`: Name of the S3 bucket
         - `limit`: Maximum number of files to read
 
-### Example Usage
-```python
-storage = HuggingFaceStorage(repo_id="my-dataset-repo", api_key="hf-token")
-
-# Save data
-preference = {"prompt": "text", "preferred": "response1", "rejected": "response2"}
-storage.save_data(data=preference, filename="my-data.json")
-
-# Load data
-data = storage.load_data(filename="my-data.json")
-print(data)
-```

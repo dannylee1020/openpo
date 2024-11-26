@@ -20,12 +20,12 @@ from openpo.client import OpenPO
 client = OpenPO(api_key=os.getenv("HF_API_KEY"))
 
 response = client.chat.completions.create_preference(
-    model="mistralai/Mistral-7B-Instruct-v0.3",
+    model="Qwen/Qwen2.5-Coder-32B-Instruct",
     messages=[
         {"role": "system", "content": PROMPT},
         {"role": "system", "content": MESSAGE},
     ],
-    diff_frequency=0.5, # generate comparison responses 50% of the time
+    diff_frequency=0.5, # generate preference responses 50% of the time
 )
 
 print(res.choices[0].message.content)
@@ -38,12 +38,12 @@ To call models that are deployed to HuggingFace Inference Endpoint, simply pass 
 client = OpenPO(api_key=os.getenv("HF_API_KEY"))
 
 response = client.chat.completions.create_preference(
-    model="<your-inference-endpoint-url",
+    model="<your-inference-endpoint-url>",
     messages=[
         {"role": "system", "content": PROMPT},
         {"role": "system", "content": MESSAGE},
     ],
-    diff_frequency=0.5, # generate comparison responses 50% of the time
+    diff_frequency=0.5, # generate preference responses 50% of the time
 )
 ```
 
@@ -57,7 +57,7 @@ client = OpenPO(
 )
 
 response = client,.chat.completions.create_preference(
-    model="mistralai/Mistral-7B-Instruct-v0.3",
+    model="qwen/qwen-2.5-coder-32b-instruct",
     messages=[
         {"role": "system", "content": PROMPT},
         {"role": "system", "content": MESSAGE},

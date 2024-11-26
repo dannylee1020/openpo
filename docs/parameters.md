@@ -1,4 +1,24 @@
 
+## Preference specific parameters
+These parameters are only available to create_preference method
+
+<br>
+
+```title="diff_frequency (float)"
+* Optional, 0.0 to 1.0
+```
+Determines the probability of generating two differenc responses for preference collection
+
+<br>
+
+```title="pref_params (dict)"
+* Optional
+```
+Extra parameters to control the output of second response. Currently supports `temperature` and `frequency_penalty`
+
+<br>
+
+
 ## Model parameters
 
 ```title="model (str)"
@@ -50,7 +70,7 @@ Limits the length of the model's response by setting a maximum token count.
 
 ```title="presence_penalty (float)"
 * Optional, -2.0 to 2.0
-* Default = 0.0
+* Default = None
 ```
 Influences topic diversity by penalizing tokens based on their presence in the text so far.
 
@@ -137,24 +157,5 @@ Provides additional context or instructions to be prepended before tool-related 
 * Optional
 ```
 A list of functions that the model may use to generate structured outputs
-
-<br>
-
-## Preference specific parameters
-These parameters are only available to create_preference method
-
-<br>
-
-```title="diff_frequency (float)"
-* Optional, 0.0 to 1.0
-```
-Determines the probability of generating two differenc responses for preference collection
-
-<br>
-
-```title="pref_params (dict)"
-* Optional
-```
-Extra parameters to control the output of second response. Currently supports `temperature`, `frequency_penalty` and `presence_penalty`
 
 <br>
