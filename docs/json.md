@@ -1,7 +1,7 @@
 To use structured output, simply pass in pydantic model.
 
 !!! Note
-    Structure Output is not supported with streaming.
+    Structured Output is not supported with streaming.
 
 ```python
 from pydantic import BaseModel
@@ -14,7 +14,7 @@ class ResponseModel(BaseModel):
 
 
 res = client.chat.completions.create_preference(
-    model='mistralai/Mixtral-8x7B-Instruct-v0.1',
+    model="Qwen/Qwen2.5-Coder-32B-Instruct",
     messages=[
         {"role": "system", "content": PROMPT},
         {"role": "system", "content": MESSAGE},
