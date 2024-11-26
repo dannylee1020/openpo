@@ -48,12 +48,12 @@ from openpo.client import OpenPO
 client = OpenPO(api_key="your-huggingface-api-key")
 
 response = client.chat.completions.create_preference(
-    model="mistralai/Mixtral-8x7B-Instruct-v0.1",
+    model="Qwen/Qwen2.5-Coder-32B-Instruct",
     messages=[
         {"role": "system", "content": PROMPT},
         {"role": "system", "content": MESSAGE},
     ],
-    diff_frequency=0.5, # generate comparison responses 50% of the time
+    diff_frequency=0.5, # generate preference responses 50% of the time
 )
 
 print(response.choices[0].message.content)
@@ -72,7 +72,7 @@ client = OpenPO(
 )
 
 response = client.chat.completions.create_preference(
-    model="anthropic/claude-3.5-sonnet:beta",
+    model= "qwen/qwen-2.5-coder-32b-instruct",
     message=[
         {"role": "system", "content": PROMPT},
         {"role": "user", "content": MESSAGE},
@@ -83,11 +83,11 @@ response = client.chat.completions.create_preference(
 print(response.choices[0].message.content)
 ```
 
-You can pass in a dictionary to `pref_params` argument to control the randomness of a second response when comparison logic is called. Currently supported parameters are: `temperature`, `frequency_penalty` and `presence_penalty`.
+You can pass in a dictionary to `pref_params` argument to control the randomness of a second response when comparison logic is called. Currently supported parameters are: `temperature` and `frequency_penalty`
 
 ```python
 response = client.chat.completions.create_preference(
-    model="anthropic/claude-3.5-sonnet:beta",
+    model="Qwen/Qwen2.5-Coder-32B-Instruct",
     message=[
         {"role": "system", "content": PROMPT},
         {"role": "user", "content": MESSAGE},
@@ -132,7 +132,7 @@ class ResponseModel(BaseModel):
 
 
 res = client.chat.completions.create_preference(
-    model='mistralai/Mixtral-8x7B-Instruct-v0.1',
+    model="Qwen/Qwen2.5-Coder-32B-Instruct",
     messages=[
         {"role": "system", "content": PROMPT},
         {"role": "system", "content": MESSAGE},
