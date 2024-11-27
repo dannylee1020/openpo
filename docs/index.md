@@ -12,10 +12,10 @@ OpenPO simplifies collecting preference data by generating pairwise responses fr
 - 🎯 **Fine-tuning Ready**: Structured data output ready for immediate model fine-tuning
 
 
-## How OpenPO Works
-1. Make requests to any model on Hugging Face and OpenRouter.
-2. OpenPO generates two different responses for user feedback, building preference dataset.
-3. The preference dataset is used to finetune models to better cater to user's preference.
+## How It Works
+1. Makes request to any model on Hugging Face and OpenRouter.
+2. Generates two different responses for user feedback, building preference dataset.
+3. Preference dataset is used to finetune models.
 
 ## What is Preference Optimization?
 Preference Optimization is a method to improve AI models based on human feedback about which outputs are better. Think of it as having a cooking show where judges taste two dishes and pick the better one - over time, the chef (AI model) learns what people prefer and gets better at cooking. By collecting preference data from humans and fine-tuning the model, models become better at capturing nuanced judgements and better align its output with what humans find desirable.
