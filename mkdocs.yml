@@ -51,13 +51,13 @@ plugins:
 markdown_extensions:
   - pymdownx.highlight:
       anchor_linenums: true
+  - toc:
+      permalink: true
   - pymdownx.superfences
   - pymdownx.inlinehilite
   - admonition
   - pymdownx.details
   - pymdownx.snippets
-  - toc:
-      permalink: true
 
 nav:
   - Welcome: index.md
