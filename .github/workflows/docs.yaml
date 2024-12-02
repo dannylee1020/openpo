@@ -21,33 +21,10 @@ jobs:
             docs:
               - 'docs/**'
               - 'mkdocs.yml'
-            deps:
-              - 'pyproject.toml'
-
-  setup-poetry:
-    needs: changes
-    if: ${{ needs.changes.outputs.deps == 'true' && needs.changes.outputs.docs == 'true'  }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-
-      - name: Install Poetry
-        run: curl -sSL https://install.python-poetry.org | python3 -
-
-
-      - name: Install dependencies
-        run: poetry install --no-interaction
 
   publish:
-    needs: [changes, setup-poetry]
-    if: |
-      always() &&
-      (needs.changes.outputs.docs == 'true' || needs.setup-poetry.result == 'success')
+    needs: changes
+    if: needs.changes.outputs.docs == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -66,4 +43,5 @@ jobs:
           restore-keys: |
             mkdocs-material-
       - run: pip install mkdocs-material
+      - run: pip install mkdocstrings-python
       - run: mkdocs gh-deploy --force
