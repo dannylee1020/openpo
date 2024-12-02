@@ -48,3 +48,17 @@ response = client.completions(
 
 !!! NOTE
     `completions` is a synchronous operation. Request to multiple models will happen sequentially. To call models asynchronously, use OpenPO async client (coming soon!)
+
+## Passing in Optional Model Parameters
+`completions` method takes dictionary of optional model parameters. For the list available parameters, take a look at [parameters section](parameters.md#optional-parameters).
+
+```python
+response = client.completions(
+    models=[ "Qwen/Qwen2.5-Coder-32B-Instruct"],
+    messages=messages,
+    params={
+        "max_tokens": 1000,
+        "temperature": 1.0,
+    }
+)
+```

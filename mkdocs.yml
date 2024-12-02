@@ -28,7 +28,26 @@ theme:
   icon:
     repo: fontawesome/brands/github
 
-# Extension for better code blocks, admonitions, etc.
+plugins:
+  - search
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          paths: [openpo]
+          options:
+            docstring_style: google
+            show_root_heading: true
+            show_source: true
+            show_root_full_path: false
+            show_symbol_type_heading: true
+            show_symobl_type_toc: true
+            heading_level: 3
+            members_order: source
+            separate_signature: true
+            show_signature_annotations: true
+            docstring_section_style: table
+
 markdown_extensions:
   - pymdownx.highlight:
       anchor_linenums: true
@@ -37,6 +56,8 @@ markdown_extensions:
   - admonition
   - pymdownx.details
   - pymdownx.snippets
+  - toc:
+      permalink: true
 
 nav:
   - Welcome: index.md

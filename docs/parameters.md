@@ -13,7 +13,7 @@ Specifies the model to use for text generation. Can be a HuggingFace or OpenRout
 ```
 messages to send to model. OpenAI format required: `{"role", "content"}`
 
-### Optional Parameters
+## Optional Parameters
 
 ```title="frequency_penalty (float)"
 * Optional, -2.0 to 2.0
