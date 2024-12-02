@@ -5,21 +5,18 @@
 ![Python](https://img.shields.io/badge/python->=3.10.1-blue.svg)
 
 
-OpenPO simplifies collecting preference data by generating pairwise responses from 200+ LLMs.
-
-![Demo](./demo/demo.gif)
-
+OpenPO simplifies building synthetic datasets for preference tuning from 200+ LLMs.
 
 ## What is OpenPO?
-OpenPO is an open source library that simplifies the process of collecting, managing, and leveraging preference data for LLM preference optimization. By automating the comparison of different LLM outputs and gathering human preference, OpenPO helps developers build better, more fine-tuned language models with minimal effort.
+OpenPO is an open source library that simplifies the process of building synthetic datasets for LLM preference tuning. By collecting outputs from 200 + LLMs and ranking them using various techniques, OpenPO helps developers build better, more fine-tuned language models with minimal effort.
 
 ## Key Features
 
-- 🔌 **Multiple LLM Support**: Call any model from HuggingFace and OpenRouter, including popular models like GPT, Claude, Llama, and Mixtral
+- 🔌 **Multiple LLM Support**: Call 200+ models from HuggingFace and OpenRouter
 
-- 🤝 **OpenAI API Compatibility**: Seamlessly integrate with OpenAI-style client APIs for easy migration and familiar developer experience
+- 🤝 **OpenAI API Compatibility**: Fully support OpenAI API format
 
-- 💾 **Flexible Storage:** Pluggable adapters for your preferred datastore, supporting various data persistence options
+- 💾 **Flexible Storage:** Out of the box storage providers for Hugging Face and S3.
 
 - 🎯 **Fine-tuning Ready**: Structured data output ready for immediate model fine-tuning and preference optimization
 
@@ -39,62 +36,66 @@ poetry install
 ```
 
 ## Getting Started
-By default, OpenPO client utilizes HuggingFace's [InferenceClient](https://huggingface.co/docs/huggingface_hub/en/package_reference/inference_client) to call models available on HuggingFace Model Hub.
+OpenPO defaults to Hugging Face when provider argument is not set.
 
 ```python
 import os
 from openpo.client import OpenPO
 
-client = OpenPO(api_key="your-huggingface-api-key")
+client = OpenPO(api_key="your-huggingface-api-key") # no need to pass in the key if environment variable is already set.
 
-response = client.chat.completions.create_preference(
-    model="Qwen/Qwen2.5-Coder-32B-Instruct",
+response = client.completions(
+    models = [
+        "Qwen/Qwen2.5-Coder-32B-Instruct",
+        "mistralai/Mistral-7B-Instruct-v0.3",
+        "microsoft/Phi-3.5-mini-instruct",
+    ],
     messages=[
         {"role": "system", "content": PROMPT},
         {"role": "system", "content": MESSAGE},
     ],
-    diff_frequency=0.5, # generate preference responses 50% of the time
 )
-
-print(response.choices[0].message.content)
 ```
 
-OpenPO also works with OpenRouter.
+To use with OpenRouter, set the provider to `openrouter`
 
 ```python
 # make request to OpenRouter
-import os
-from openpo.client import OpenPO
+client = OpenPO(api_key="<your-openrouter-api-key", provider='openrouter')
 
-client = OpenPO(
-    api_key='your-openrouter-api-key',
-    base_url="https://openrouter.ai/api/v1/chat/completions"
-)
-
-response = client.chat.completions.create_preference(
-    model= "qwen/qwen-2.5-coder-32b-instruct",
-    message=[
-        {"role": "system", "content": PROMPT},
-        {"role": "user", "content": MESSAGE},
+response = client.completions(
+    models = [
+        "qwen/qwen-2.5-coder-32b-instruct",
+        "mistralai/mistral-7b-instruct-v0.3",
+        "microsoft/phi-3.5-mini-128k-instruct",
     ],
-    diff_frequency=0.5
-)
+    messages=[
+        {"role": "system", "content": PROMPT},
+        {"role": "system", "content": MESSAGE},
+    ],
 
-print(response.choices[0].message.content)
+)
 ```
 
-You can pass in a dictionary to `pref_params` argument to control the randomness of a second response when comparison logic is called. Currently supported parameters are: `temperature` and `frequency_penalty`
+OpenPO takes default model parameters as a dictionary. Take a look at the documentation for more detail.
 
 ```python
-response = client.chat.completions.create_preference(
-    model="Qwen/Qwen2.5-Coder-32B-Instruct",
-    message=[
-        {"role": "system", "content": PROMPT},
-        {"role": "user", "content": MESSAGE},
+response = client.completions(
+    models = [
+        "Qwen/Qwen2.5-Coder-32B-Instruct",
+        "mistralai/Mistral-7B-Instruct-v0.3",
+        "microsoft/Phi-3.5-mini-instruct",
     ],
-    diff_frequency=0.5,
-    pref_params={"temperature": 1.5, "frequency_penalty": 0.5},
+    messages=[
+        {"role": "system", "content": PROMPT},
+        {"role": "system", "content": MESSAGE},
+    ],
+    params={
+        "max_tokens": 500,
+        "temperature": 1.0,
+    }
 )
+
 ```
 
 ### Saving Data
@@ -103,7 +104,7 @@ Use providers to easily upload and download data.
 ```python
 import os
 from openpo.client import OpenPO
-from openpo.providers.huggingface import HuggingFaceStorage
+from openpo.storage.huggingface import HuggingFaceStorage
 
 storage = HuggingFaceStorage(repo_id="my-dataset-repo", api_key="hf-token")
 client = OpenPO(api_key="your-huggingface-token")
@@ -131,21 +132,45 @@ class ResponseModel(BaseModel):
     response: str
 
 
-res = client.chat.completions.create_preference(
-    model="Qwen/Qwen2.5-Coder-32B-Instruct",
+res = client.completions(
+    models=["Qwen/Qwen2.5-Coder-32B-Instruct"],
     messages=[
         {"role": "system", "content": PROMPT},
         {"role": "system", "content": MESSAGE},
     ],
-    diff_frequency=0.5,
-    response_format=ResponseModel,
+    params = {
+        "response_format": ResponseFormat,
+    }
 )
 ```
 
-## Try Out
-Set environment variable first
+## Contributing
+We welcome contributions to OpenPO! Here's how you can help:
+
+### Development Setup
+1. Fork and clone the repository
 ```bash
-export HF_API_KEY=<your-api-key>
+git clone https://github.com/yourusername/openpo.git
+cd openpo
 ```
 
-then run `docker compose up --build` to try demo in your localhost.
+2. Install Poetry (dependency management tool)
+```bash
+curl -sSL https://install.python-poetry.org | python3 -
+```
+
+3. Install dependencies
+```bash
+poetry install
+```
+
+### Development Workflow
+1. Create a new branch for your feature
+```bash
+git checkout -b feature-name
+```
+
+2. Submit a Pull Request
+- Write a clear description of your changes
+- Reference any related issues
+
