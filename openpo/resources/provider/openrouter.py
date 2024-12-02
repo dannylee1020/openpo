@@ -12,6 +12,26 @@ from .base import LLMProvider
 
 
 class OpenRouter(LLMProvider):
+    """
+    A provider class for interacting with OpenRouter's API service.
+
+    This class implements the LLMProvider interface to handle text generation requests
+    through OpenRouter's API. It manages API authentication and provides methods for
+    generating text completions with support for both streaming and non-streaming responses.
+
+    Attributes:
+        url (str): The OpenRouter API endpoint URL.
+        api_key (str): The OpenRouter API key for authentication.
+        headers (Dict[str, str]): HTTP headers used for API requests.
+
+    Args:
+        api_key (str): The API key for OpenRouter. If not provided,
+            attempts to read from OPENROUTER_API_KEY environment variable.
+
+    Raises:
+        ValueError: If no API key is provided or found in environment variables.
+    """
+
     def __init__(self, api_key):
         self.url = "https://openrouter.ai/api/v1/chat/completions"
         self.api_key = api_key or os.getenv("OPENROUTER_API_KEY")
@@ -79,24 +99,38 @@ class OpenRouter(LLMProvider):
         params: Optional[Dict[str, Any]] = None,
     ):
         """
-        params
-        frequency_penalty: Optional[float] = None,
-        logit_bias: Optional[List[float]] = None,
-        logprobs: Optional[bool] = None,
-        max_tokens: Optional[int] = None,
-        presence_penalty: Optional[float] = None,
-        response_format: Optional[dict] = None,
-        seed: Optional[int] = None,
-        stop: Optional[int] = None,
-        stream: Optional[bool] = False,
-        stream_options: Optional[dict] = None,
-        temperature: Optional[float] = None,
-        top_logprobs: Optional[int] = None,
-        top_p: Optional[float] = None,
-        tool_choice: Optional[str] = None,
-        tool_prompt: Optional[str] = None,
-        tools: Optional[List[dict]] = None,
-        pref_params: Optional[List[Dict[str, Any]]] = None,
+        Generate text completions using specified OpenRouter models.
+
+        Args:
+            models (List[str]): List of model identifiers to use for generation.
+            messages (List[Dict[str, Any]]): List of message dictionaries containing
+                the conversation history.
+            params (Optional[Dict[str, Any]]): Additional parameters for the generation:
+                - frequency_penalty (Optional[float]): Penalty for token frequency
+                - logit_bias (Optional[List[float]]): Token biases for generation
+                - logprobs (Optional[bool]): Whether to return log probabilities
+                - max_tokens (Optional[int]): Maximum number of tokens to generate
+                - presence_penalty (Optional[float]): Penalty for token presence
+                - response_format (Optional[dict]): Desired format for the response
+                - seed (Optional[int]): Random seed for generation
+                - stop (Optional[int]): Stop sequence for generation
+                - stream (Optional[bool]): Whether to stream the response
+                - stream_options (Optional[dict]): Options for streaming
+                - temperature (Optional[float]): Sampling temperature
+                - top_logprobs (Optional[int]): Number of top log probabilities to return
+                - top_p (Optional[float]): Nucleus sampling parameter
+                - tool_choice (Optional[str]): Tool selection parameter
+                - tool_prompt (Optional[str]): Prompt for tool usage
+                - tools (Optional[List[dict]]): List of available tools
+                - pref_params (Optional[List[Dict[str, Any]]]): Model-specific parameters
+
+        Returns:
+            List[Union[ChatCompletionOutput, Generator[ChatCompletionStreamOutput, None, None]]]:
+                List of responses from the models, which can be either direct outputs or
+                stream generators depending on the stream parameter.
+
+        Raises:
+            Exception: If there's an error during the API request or response processing.
         """
         try:
             if params is None:
