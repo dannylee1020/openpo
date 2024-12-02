@@ -44,8 +44,10 @@ jobs:
         run: poetry install --no-interaction
 
   publish:
-    needs: changes
-    if: ${{ needs.changes.outputs.docs == 'true' }}
+    needs: [changes, setup-poetry]
+    if: |
+      always() &&
+      (needs.changes.outputs.docs == 'true' || needs.setup-poetry.result == 'success')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
