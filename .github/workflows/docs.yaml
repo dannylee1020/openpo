@@ -12,6 +12,8 @@ jobs:
       docs: ${{ steps.filter.outputs.docs }}
       deps: ${{ steps.filter.outputs.deps }}
     steps:
+      - uses: actions/checkout@v4
+
       - uses: dorny/paths-filter@v2
         id: filter
         with:
