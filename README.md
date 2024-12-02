@@ -110,7 +110,7 @@ storage = HuggingFaceStorage(repo_id="my-dataset-repo", api_key="hf-token")
 client = OpenPO(api_key="your-huggingface-token")
 
 preference = {} # preference data needs to be in the format {"prompt": ..., "preferred": ..., "rejected": ...} for finetuning
-storage.save_data(data=preference, filename="my-data.json")
+storage.push_to_hub(data=preference, filename="my-data.json")
 ```
 
 ## Structured Outputs (JSON Mode)
