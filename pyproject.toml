@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "openpo"
 version = "0.2.0"
-description = "Preference Optimization made easy"
+description = "Build high quality synthetic datasets with AI feedback from 200+ LLMs"
 authors = ["Daniel Lee <dannylee1020@gmail.com>"]
 license = "Apache-2.0"
 keywords = ["llm", "finetuning", "ai", "rlaif", "preference tuning", "synthetic data generation"]

@@ -13,8 +13,8 @@ OpenPO simplifies building synthetic datasets by leveraging AI feedback from 200
 
 
 ## How It Works
-1. Collect outputs from any model on Hugging Face and OpenRouter.
-2. Run various ranking techniques from verified research papers on the outputs data.
+1. Collect responses from multiple models on Hugging Face and OpenRouter.
+2. Run various ranking techniques from verified research papers on the outputs data. (feature coming soon!)
 3. Preference dataset is now ready for fine-tuning your model!
 
 
