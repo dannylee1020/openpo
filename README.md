@@ -14,11 +14,12 @@ OpenPO is an open source library that simplifies the process of building synthet
 
 - 🔌 **Multiple LLM Support**: Call 200+ models from HuggingFace and OpenRouter
 
+- 🧪 **Research-Backed Methodologies**: Implementation of various methodologies on data synthesis from latest research papers. (feature coming soon!)
+
 - 🤝 **OpenAI API Compatibility**: Fully support OpenAI API format
 
 - 💾 **Flexible Storage:** Out of the box storage providers for Hugging Face and S3.
 
-- 🎯 **Fine-tuning Ready**: Structured data output ready for immediate model fine-tuning and preference optimization
 
 ## Installation
 ### Install from PyPI (recommended)
