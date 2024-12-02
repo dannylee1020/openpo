@@ -42,9 +42,10 @@ nav:
   - Welcome: index.md
   - Installation: installation.md
   - Quick Start: quickstart.md
+  - Usage: usage.md
   - Structured Output (JSON Mode): json.md
-  - Pairwise Response: preference.md
   - Storage: storage.md
   - Parameters: parameters.md
   - Responses: response.md
   - Errors: errors.md
+  - API Reference: api.md

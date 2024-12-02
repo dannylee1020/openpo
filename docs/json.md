@@ -13,14 +13,15 @@ class ResponseModel(BaseModel):
     response: str
 
 
-res = client.chat.completions.create_preference(
-    model="Qwen/Qwen2.5-Coder-32B-Instruct",
+res = client.completions(
+    models=["Qwen/Qwen2.5-Coder-32B-Instruct"],
     messages=[
         {"role": "system", "content": PROMPT},
         {"role": "system", "content": MESSAGE},
     ],
-    diff_frequency=0.5,
-    response_format=ResponseModel,
+    params = {
+        "response_format": ResponseModel,
+    }
 )
 ```
 

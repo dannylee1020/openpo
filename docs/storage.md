@@ -1,23 +1,21 @@
 # Storage Providers
 
-OpenPO is integrated with S3 and Hugging Face Hub out of the box. Use providers to easily upload and download datasets.
+OpenPO is integrated with S3 and Hugging Face Hub out of the box. Use storage class to easily upload and download datasets.
 
 ## Usage
 ```python
-storage = HuggingFaceStorage(repo_id="my-dataset-repo", api_key="hf-token")
+hf_storage = HuggingFaceStorage(repo_id="my-dataset-repo", api_key="hf-token")
 
 # Save data
 preference = {"prompt": "text", "preferred": "response1", "rejected": "response2"}
-storage.save_data(data=preference, filename="my-data.json")
+hf_storage.push_to_hub(data=preference, filename="my-data.json")
 
 # Load data
-data = storage.load_data(filename="my-data.json")
-print(data)
+data = hf_storage.load_from_hub(filename="my-data.json")
 ```
 
 ## Hugging Face Storage
 
-### Initialization
 ```python
 from openpo.providers.huggingface import HuggingFaceStorage
 
@@ -28,21 +26,19 @@ storage = HuggingFaceStorage(
 ```
 
 ### Methods
-- `save_data(data: Dict[str, Any], filename: str) -> bool`
+- `push_to_hub(data: Dict[str, Any], filename: str) -> bool`
     - Parameters:
         - `data`: Dictionary containing the data to save
         - `filename`: Name of the file to save the data to
 
-- `load_data(filename: str) -> Dict[str, Any]`
+- `load_from_hub(filename: str) -> Dict[str, Any]`
     - Parameters:
         - `filename`: Name of the file to load
 
-- `load_data_all() -> List[Dict[str, Any]]`
 
 
 ## S3 Storage
 
-### Initialization
 ```python
 from openpo.providers.s3 import S3Storage
 
@@ -55,19 +51,14 @@ storage = S3Storage(
 ```
 
 ### Methods
-- `save_data(data: List[Dict[str, Any]], bucket: str, key: str = None)`
+- `push_to_s3(data: List[Dict[str, Any]], bucket: str, key: str = None)`
     - Parameters:
         - `data`: List of dictionaries containing the data to save
         - `bucket`: Name of the S3 bucket
         - `key`: Object key (path) in the bucket
 
-- `load_data(bucket: str, key: str) -> List[Dict[str, Any]]`
+- `load_from_s3(bucket: str, key: str) -> List[Dict[str, Any]]`
     - Parameters:
         - `bucket`: Name of the S3 bucket
         - `key`: Object key (path) in the bucket
-
-- `load_data_all(bucket: str, limit: int) -> List[Dict[str, Any]]`
-    - Parameters:
-        - `bucket`: Name of the S3 bucket
-        - `limit`: Maximum number of files to read
 

@@ -1,27 +1,7 @@
 
-## Preference specific parameters
-These parameters are only available to create_preference method
+## Required Parameters
 
-<br>
-
-```title="diff_frequency (float)"
-* Optional, 0.0 to 1.0
-```
-Determines the probability of generating two differenc responses for preference collection
-
-<br>
-
-```title="pref_params (dict)"
-* Optional
-```
-Extra parameters to control the output of second response. Currently supports `temperature` and `frequency_penalty`
-
-<br>
-
-
-## Model parameters
-
-```title="model (str)"
+```title="models (list[str])"
 * Required
 ```
 Specifies the model to use for text generation. Can be a HuggingFace or OpenRouter model
@@ -33,8 +13,7 @@ Specifies the model to use for text generation. Can be a HuggingFace or OpenRout
 ```
 messages to send to model. OpenAI format required: `{"role", "content"}`
 
-
-<br>
+### Optional Parameters
 
 ```title="frequency_penalty (float)"
 * Optional, -2.0 to 2.0
@@ -157,5 +136,12 @@ Provides additional context or instructions to be prepended before tool-related 
 * Optional
 ```
 A list of functions that the model may use to generate structured outputs
+
+<br>
+
+```title="pref_params (list[dict[str, float]])"
+* Optional
+```
+Extra parameters to control the model outputs from the model list except the first one . Currently supports `temperature` and `frequency_penalty`
 
 <br>
