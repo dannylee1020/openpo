@@ -99,7 +99,7 @@ response = client.completions(
 ```
 
 ### Saving Data
-Use providers to easily upload and download data.
+Use out of the box storage class to easily upload and download data.
 
 ```python
 import os
@@ -145,7 +145,7 @@ res = client.completions(
 ```
 
 ## Contributing
-We welcome contributions to OpenPO! Here's how you can help:
+Contributions are what makes open source amazingly special! Here's how you can help:
 
 ### Development Setup
 1. Fork and clone the repository
