@@ -1,34 +1,39 @@
 import os
 from typing import Any, Dict, List, Optional
 
-from huggingface_hub import InferenceClient
+from .resources.provider.huggingface import HuggingFace
+from .resources.provider.openrouter import OpenRouter
 
-from openpo.resources.chat import chat
+ENV_MAPPING = {
+    "huggingface": "HF_API_KEY",
+    "openrouter": "OPENROUTER_API_KEY",
+}
 
 
 class OpenPO:
     def __init__(
         self,
+        provider: Optional[str] = "huggingface",
         api_key: Optional[str] = None,
-        base_url: Optional[str] = None,
     ):
-        self.api_key = api_key
+        self.provider = provider
+        self.api_key = api_key or os.getenv(f"{ENV_MAPPING[provider]}")
         if not self.api_key:
-            raise ValueError("API key must be provided")
+            raise ValueError("No API key is provided")
 
-        self.base_url = base_url
+    def completions(
+        self,
+        models: List[str],
+        messages: List[Dict[str, Any]],
+        params: Optional[Dict[str, Any]],
+    ):
+        if self.provider == "huggingface":
+            llm = HuggingFace(api_key=self.api_key)
+            res = llm.generate(models=models, messages=messages, params=params)
 
-        # Initialize client based on configuration
-        if self.base_url:
-            self.client = {
-                "base_url": self.base_url,
-                "headers": {"Authorization": f"Bearer {self.api_key}"},
-            }
+            return res
         else:
-            self.client = {
-                "inference_client": InferenceClient(api_key=self.api_key),
-                "api_key": self.api_key,
-            }
+            llm = OpenRouter(api_key=self.api_key)
+            res = llm.generate(models=models, messages=messages, params=params)
 
-        # Initialize chat resource
-        self.chat = chat.Chat(self.client)
+            return res
