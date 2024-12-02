@@ -4,7 +4,7 @@ version = "0.2.0"
 description = "Preference Optimization made easy"
 authors = ["Daniel Lee <dannylee1020@gmail.com>"]
 license = "Apache-2.0"
-keywords = ["llm", "finetuning", "preference optimization, rlhf", "fine-tuning"]
+keywords = ["llm", "finetuning", "preference optimization, rlaif", "preference tuning", "synthetic data generation"]
 include = ["LICENSE", "README.md"]
 repository = "https://github.com/dannylee1020/openpo"
 documentation="https://docs.openpo.dev"
@@ -23,6 +23,7 @@ aiohttp = "^3.11.7"
 [tool.poetry.group.dev.dependencies]
 streamlit = "^1.39.0"
 mkdocs-material = "^9.5.44"
+mkdocstrings-python = "^1.12.2"
 
 [build-system]
 requires = ["poetry-core"]
