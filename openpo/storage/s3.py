@@ -32,7 +32,7 @@ class S3Storage:
         except ClientError as err:
             raise err
 
-    def save_data(
+    def push_to_hub(
         self,
         data: List[Dict[str, Any]],
         bucket: str,
@@ -51,30 +51,6 @@ class S3Storage:
         except ClientError as err:
             raise err
 
-    def load_data(self, bucket: str, key: str) -> List[Dict[str, Any]]:
+    def read_from_hub(self, bucket: str, key: str) -> List[Dict[str, Any]]:
         content = self._read_file(bucket, key)
         return content
-
-    def load_data_all(self, bucket: str, limit: int):
-        all_data = []
-        files_read = 0
-
-        try:
-            files = self.s3.list_objects_v2(Bucket=bucket)
-
-            for obj in files["Contents"]:
-                if files_read >= limit:
-                    return all_data
-
-                try:
-                    f = self._read_file(bucket, obj["Key"])
-                    all_data.extend(f)
-
-                    files_read += 1
-                except Exception as e:
-                    raise Exception(f"Error reading file {obj["Key"]}: {e}")
-
-            return all_data
-
-        except ClientError as err:
-            raise err
