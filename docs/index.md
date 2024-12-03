@@ -18,7 +18,7 @@ OpenPO simplifies building synthetic datasets by leveraging AI feedback from 200
 
 
 ## What is Preference Optimization?
-Preference Optimization is a method to improve AI models based on human feedback about which outputs are better. Think of it as having a cooking show where judges taste two dishes and pick the better one - over time, the chef (AI model) learns what people prefer and gets better at cooking. By collecting preference data from humans and fine-tuning the model, models become better at capturing nuanced judgements and better align its output with what humans find desirable.
+Preference Optimization is a method to improve AI models based on human feedback about which outputs are better. Think of it as having a cooking show where judges taste two dishes and pick the better one - over time, the chef (AI model) learns what people prefer and gets better at cooking. By fine-tuning a model preference dataset, it becomes better at capturing nuanced judgements and better align its output with what humans find desirable.
 
 
 ## Why Synthetic Datasets?
