@@ -9,10 +9,10 @@ OpenPO simplifies building synthetic datasets by leveraging AI feedback from 200
 
 - 🤝 **OpenAI API Compatibility**: Fully support OpenAI API format
 
-- 💾 **Flexible Storage:** Out of the box storage providers for Hugging Face and S3.
+- 💾 **Flexible Storage:** Out of the box storage providers for HuggingFace and S3.
 
 ## How It Works
-1. Collect responses from multiple models on Hugging Face and OpenRouter.
+1. Collect outputs from multiple models on HuggingFace or OpenRouter.
 2. Run various data synthesis techniques on the outputs data. (feature coming soon!)
 3. Dataset is now ready for fine-tuning!
 
