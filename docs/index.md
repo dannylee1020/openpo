@@ -24,5 +24,5 @@ Preference Optimization is a method to improve AI models based on human feedback
 ## Why Synthetic Datasets?
 The cornerstone of AI excellence is data quality - a principle often expressed as "garbage in, garbage out." However, obtaining high-quality training data remains one of the most significant bottlenecks in AI development, demanding substantial time and resources from teams.
 
-Recent research has demonstrated breakthrough results using synthetic datasets, challenging the traditional reliance on manually collected data. OpenPO empowers developers to harness this potential by streamlining the synthesis of high-quality training data. Our mission is to eliminate the data preparation bottleneck, allowing developers to focus on what matters most: building exceptional AI applications.
+Recent research has demonstrated breakthrough results using synthetic datasets, challenging the traditional reliance on human annotated data. OpenPO empowers developers to harness this potential by streamlining the synthesis of high-quality training data. Our mission is to eliminate the data preparation bottleneck, allowing developers to focus on what matters most: building exceptional AI applications.
 
