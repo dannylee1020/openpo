@@ -1,7 +1,7 @@
 import os
 from typing import Any, Dict, List, Optional
 
-from ..internal.response import ChatCompletionOutput, ChatCompletionStreamOutput
+from .internal.response import ChatCompletionOutput, ChatCompletionStreamOutput
 from .resources.provider.huggingface import HuggingFace
 from .resources.provider.openrouter import OpenRouter
 
