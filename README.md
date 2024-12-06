@@ -7,6 +7,11 @@
 
 OpenPO simplifies building synthetic datasets for preference tuning from 200+ LLMs.
 
+| Resources | Notebooks |
+|----------|----------|
+| Building dataset with OpenPO and PairRM  |📔 [Notebook](https://colab.research.google.com/drive/1G1T-vOTXjIXuRX3h9OlqgnE04-6IpwIf?usp=sharing) |
+
+
 ## What is OpenPO?
 OpenPO is an open source library that simplifies the process of building synthetic datasets for LLM preference tuning. By collecting outputs from 200 + LLMs and ranking them using various techniques, OpenPO helps developers build better, more fine-tuned language models with minimal effort.
 
@@ -16,7 +21,7 @@ OpenPO is an open source library that simplifies the process of building synthet
 
 - 🧪 **Research-Backed Methodologies**: Implementation of various methodologies on data synthesis from latest research papers. (feature coming soon!)
 
-- 🤝 **OpenAI API Compatibility**: Fully support OpenAI API format
+- 🤝 **OpenAI API Compatibility**: Support for OpenAI API format
 
 - 💾 **Flexible Storage:** Out of the box storage providers for Hugging Face and S3.
 
@@ -37,6 +42,11 @@ poetry install
 ```
 
 ## Getting Started
+set environment variable first
+```bash
+export HF_API_KEY=<your-api-key>
+export OPENROUTER_API_KEY=<your-api-key>
+```
 OpenPO defaults to Hugging Face when provider argument is not set.
 
 ```python
@@ -174,4 +184,3 @@ git checkout -b feature-name
 2. Submit a Pull Request
 - Write a clear description of your changes
 - Reference any related issues
-
