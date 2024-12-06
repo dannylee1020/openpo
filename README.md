@@ -99,19 +99,19 @@ response = client.completions(
 
 ```
 
-### Saving Data
+### Storing Data
 Use out of the box storage class to easily upload and download data.
 
 ```python
-import os
-from openpo.client import OpenPO
 from openpo.storage.huggingface import HuggingFaceStorage
+hf_storage = HuggingFaceStorage(repo_id="my-dataset-repo", api_key="hf-token") # api_key can also be set as environment variable.
 
-storage = HuggingFaceStorage(repo_id="my-dataset-repo", api_key="hf-token")
-client = OpenPO(api_key="your-huggingface-token")
+# push data to repo
+preference = {"prompt": "text", "preferred": "response1", "rejected": "response2"}
+hf_storage.push_to_repo(data=preference)
 
-preference = {} # preference data needs to be in the format {"prompt": ..., "preferred": ..., "rejected": ...} for finetuning
-storage.push_to_hub(data=preference, filename="my-data.json")
+# Load data from repo
+data = hf_storage.load_from_repo()
 ```
 
 ## Structured Outputs (JSON Mode)
