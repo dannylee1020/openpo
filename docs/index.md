@@ -1,13 +1,20 @@
 #👋🏻 Welcome
 OpenPO simplifies building synthetic datasets by leveraging AI feedback from 200+ LLMs.
 
+<div class="grid cards" markdown>
+
+- 📔  [__OpenPO Notebooks__](resource.md)
+
+
+</div>
+
 ## Key Features
 
 - 🔌 **Multiple LLM Support**: Call 200+ models from HuggingFace and OpenRouter
 
 - 🧪 **Research-Backed Methodologies**: Implementation of various methodologies on data synthesis from latest research papers. (feature coming soon!)
 
-- 🤝 **OpenAI API Compatibility**: Fully support OpenAI API format
+- 🤝 **OpenAI API Compatibility**: Support for OpenAI API format
 
 - 💾 **Flexible Storage:** Out of the box storage providers for HuggingFace and S3.
 

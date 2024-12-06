@@ -58,6 +58,9 @@ markdown_extensions:
   - admonition
   - pymdownx.details
   - pymdownx.snippets
+  - attr_list
+  - md_in_html
+
 
 nav:
   - Welcome: index.md
@@ -69,4 +72,5 @@ nav:
   - Parameters: parameters.md
   - Responses: response.md
   - Errors: errors.md
+  - Resources: resource.md
   - API Reference: api.md
