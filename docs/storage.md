@@ -1,64 +1,44 @@
 # Storage Providers
 
-OpenPO is integrated with S3 and Hugging Face Hub out of the box. Use storage class to easily upload and download datasets.
+OpenPO provides storage class for S3 and HuggingFace Dataset repository out of the box. Use storage class to easily upload and download datasets.
 
-## Usage
+## HuggingFace Storage
+OpenPO uses HuggingFace `push_to_hub` function under the hood. For more information on the method, refer to the [API Reference section](api.md#storage)
+
 ```python
-hf_storage = HuggingFaceStorage(repo_id="my-dataset-repo", api_key="hf-token")
+hf_storage = HuggingFaceStorage(repo_id="my-dataset-repo", api_key="hf-token") # api_key can also be set as environment variable.
 
-# Save data
+# push data to repo
 preference = {"prompt": "text", "preferred": "response1", "rejected": "response2"}
-hf_storage.push_to_hub(data=preference, filename="my-data.json")
+hf_storage.push_to_repo(data=preference)
 
-# Load data
-data = hf_storage.load_from_hub(filename="my-data.json")
+# Load data from repo
+data = hf_storage.load_from_repo()
 ```
-
-## Hugging Face Storage
-
-```python
-from openpo.providers.huggingface import HuggingFaceStorage
-
-storage = HuggingFaceStorage(
-    repo_id="username/repo_name",  # The repository ID on HuggingFace
-    api_key="hf-token"            # HuggingFace API token with write access
-)
-```
-
-### Methods
-- `push_to_hub(data: Dict[str, Any], filename: str) -> bool`
-    - Parameters:
-        - `data`: Dictionary containing the data to save
-        - `filename`: Name of the file to save the data to
-
-- `load_from_hub(filename: str) -> Dict[str, Any]`
-    - Parameters:
-        - `filename`: Name of the file to load
-
-
 
 ## S3 Storage
+`S3Storage` supports serialization for `json` and `parquet`. To initialize the class, you can either pass in the keyword arguments or configure aws credentials with `aws configure`
 
 ```python
 from openpo.providers.s3 import S3Storage
 
-storage = S3Storage(
+s3 = S3Storage(
     region_name="us-west-2",              # Optional: AWS region
     aws_access_key_id="access_key",       # Optional: AWS access key
     aws_secret_access_key="secret_key",   # Optional: AWS secret key
     profile_name="default"                # Optional: AWS profile name
 )
+
+# push data to s3
+preference = {"prompt": "text", "preferred": "response1", "rejected": "response2"}
+s3.push_to_s3(
+    data=preference,
+    bucket="my-bucket",
+    key="my-key",
+    ext_type='parquet',
+)
+
+# load data from s3
+data = s3.load_from_s3(bucket='my-bucket', key='data-key')
+
 ```
-
-### Methods
-- `push_to_s3(data: List[Dict[str, Any]], bucket: str, key: str = None)`
-    - Parameters:
-        - `data`: List of dictionaries containing the data to save
-        - `bucket`: Name of the S3 bucket
-        - `key`: Object key (path) in the bucket
-
-- `load_from_s3(bucket: str, key: str) -> List[Dict[str, Any]]`
-    - Parameters:
-        - `bucket`: Name of the S3 bucket
-        - `key`: Object key (path) in the bucket
-

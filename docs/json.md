@@ -1,4 +1,4 @@
-To use structured output, simply pass in pydantic model.
+To use structured output, use Pydantic model.
 
 !!! Note
     Structured Output is not supported with streaming.
