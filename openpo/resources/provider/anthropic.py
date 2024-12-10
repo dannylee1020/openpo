@@ -46,9 +46,9 @@ class Anthropic(LLMProvider):
         try:
             res = self.client.messages.create(
                 model=model,
-                system=prompt if prompt else prompt.ANNOTATE_PROMPT,
+                system=prompt if prompt else prompt.EVALUATION_PROMPT,
                 messages=[
-                    {"role": "user", "content": prompt.ANNOTATE_QUERY.format(data)},
+                    {"role": "user", "content": prompt.EVALUATION_QUERY.format(data)},
                 ],
                 max_tokens=4096,
                 tools=tools,

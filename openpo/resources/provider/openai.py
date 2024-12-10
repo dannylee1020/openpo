@@ -36,8 +36,11 @@ class OpenAI(LLMProvider):
         prompt: Optional[str] = None,
     ):
         messages = [
-            {"role": "system", "content": prompt if prompt else prompt.ANNOTATE_PROMPT},
-            {"role": "user", "content": prompt.ANNOTATE_QUERY.format(data)},
+            {
+                "role": "system",
+                "content": prompt if prompt else prompt.EVALUATION_PROMPT,
+            },
+            {"role": "user", "content": prompt.EVALUATION_QUERY.format(data)},
         ]
 
         try:
