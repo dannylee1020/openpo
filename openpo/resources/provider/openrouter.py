@@ -94,7 +94,7 @@ class OpenRouter(LLMProvider):
 
     def generate(
         self,
-        models: List[str],
+        model: str,
         messages: List[Dict[str, Any]],
         params: Optional[Dict[str, Any]] = None,
     ):
@@ -122,11 +122,11 @@ class OpenRouter(LLMProvider):
                 - tool_choice (Optional[str]): Tool selection parameter
                 - tool_prompt (Optional[str]): Prompt for tool usage
                 - tools (Optional[List[dict]]): List of available tools
-                - pref_params (Optional[List[Dict[str, Any]]]): Model-specific parameters
+                - pref_params (Optional[[Dict[str, Any]]): Model-specific parameters
 
         Returns:
-            List[Union[ChatCompletionOutput, Generator[ChatCompletionStreamOutput, None, None]]]:
-                List of responses from the models, which can be either direct outputs or
+            ChatCompletionOutput | ChatCompletionStreamOutput:
+                Response from model, which can be either direct outputs or
                 stream generators depending on the stream parameter.
 
         Raises:
@@ -150,21 +150,13 @@ class OpenRouter(LLMProvider):
 
                 params["response_format"] = None
 
-            response = []
-            pref_params = params.pop("pref_params", [])
-            for i in range(len(models)):
-                if i < len(pref_params):
-                    params.update(pref_params[i])
+            if params.get("pref_params"):
+                params.update(params["pref_params"])
+                del params["pref_params"]
 
-                params = {
-                    "model": models[i],
-                    "messages": messages,
-                    **params,
-                }
+            body = {"model": model, "messages": messages, **params}
+            res = self._make_api_request(endpoint=self.url, params=body)
 
-                res = self._make_api_request(endpoint=self.url, params=params)
-                response.append(res)
-
-            return response
-        except Exception:
-            raise
+            return res
+        except Exception as e:
+            raise Exception(f"Error calling model from OpenRouter {e}")

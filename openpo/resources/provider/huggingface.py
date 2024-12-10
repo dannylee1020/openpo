@@ -35,12 +35,12 @@ class HuggingFace(LLMProvider):
 
     def generate(
         self,
-        models: List[str],
+        model: str,
         messages: List[Dict[str, Any]],
         params: Optional[Dict[str, Any]] = None,
     ):
         """
-        Generate text completions using specified HuggingFace models.
+        Generate text completions using specified HuggingFace model.
 
         Args:
             models (List[str]): List of model identifiers to use for generation.
@@ -63,10 +63,10 @@ class HuggingFace(LLMProvider):
                 - tool_choice (Optional[str]): Tool selection parameter
                 - tool_prompt (Optional[str]): Prompt for tool usage
                 - tools (Optional[List[dict]]): List of available tools
-                - pref_params (Optional[List[Dict[str, Any]]]): Model-specific parameters
+                - pref_params (Optional[Dict[str, Any]]): Model-specific parameters
 
         Returns:
-            List[Any]: List of responses from the models, one for each model in the input list.
+            ChatCompletionOutput | ChatCOmpletionStreamOutput: Response from the model.
 
         Raises:
             Exception: If there's an error calling the HuggingFace API.
@@ -86,18 +86,12 @@ class HuggingFace(LLMProvider):
                     }
                 )
 
-            response = []
-            pref_params = params.pop("pref_params", [])
+            if params.get("pref_params"):
+                params.update(params["pref_params"])
+                del params["pref_params"]
 
-            for i in range(len(models)):
-                if i < len(pref_params):
-                    params.update(pref_params[i])
+            res = self.client.chat_completion(model=model, messages=messages, **params)
 
-                res = self.client.chat_completion(
-                    model=models[i], messages=messages, **params
-                )
-                response.append(res)
-
-            return response
+            return res
         except Exception as e:
-            raise Exception(f"Error calling LLM from HuggingFace: {e}")
+            raise Exception(f"Error calling model from HuggingFace: {e}")
