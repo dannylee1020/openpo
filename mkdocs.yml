@@ -69,6 +69,7 @@ nav:
   - Usage: usage.md
   - Structured Output (JSON Mode): json.md
   - Storage: storage.md
+  - Providers: provider.md
   - Parameters: parameters.md
   - Responses: response.md
   - Errors: errors.md
