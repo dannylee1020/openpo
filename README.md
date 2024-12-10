@@ -47,6 +47,10 @@ set environment variable first
 export HF_API_KEY=<your-api-key>
 export OPENROUTER_API_KEY=<your-api-key>
 ```
+To get started, simply pass in a list of model names of your choice
+
+> [!NOTE]
+> OpenPo requires provider name to be prepended to the model identifier.
 
 ```python
 import os
@@ -67,11 +71,11 @@ response = client.completions(
 )
 ```
 
-To use with OpenRouter, set the provider to `openrouter`
+You can also call models with OpenPO.
 
 ```python
 # make request to OpenRouter
-client = OpenPO(api_key="<your-openrouter-api-key", provider='openrouter')
+client = OpenPO()
 
 response = client.completions(
     models = [
@@ -113,7 +117,7 @@ Use out of the box storage class to easily upload and download data.
 
 ```python
 from openpo.storage.huggingface import HuggingFaceStorage
-hf_storage = HuggingFaceStorage(repo_id="my-dataset-repo", api_key="hf-token") # api_key can also be set as environment variable.
+hf_storage = HuggingFaceStorage(repo_id="my-dataset-repo")
 
 # push data to repo
 preference = {"prompt": "text", "preferred": "response1", "rejected": "response2"}
