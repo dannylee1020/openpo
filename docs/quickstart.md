@@ -9,19 +9,23 @@ export OPENROUTER_API_KEY=<your-openrouter-api-key>
 ```
 
 ## Basic Usage
-OpenPO defaults to Hugging Face when provider argument is not set.
+To call multiple models, simply add models of your choice as a list and pass it to the `completions` method.
+
+!!! Note
+    OpenPO requires provider name to be prepended to the model identifier. Refer to the [provider section of the documentation](provider.md)
+    for more information.
 
 ```python
 import os
 from openpo.client import OpenPO
 
-client = OpenPO(api_key="your-huggingface-api-key") # no need to pass in the key if environment variable is already set.
+client = OpenPO()
 
 response = client.completions(
     models = [
-        "Qwen/Qwen2.5-Coder-32B-Instruct",
-        "mistralai/Mistral-7B-Instruct-v0.3",
-        "microsoft/Phi-3.5-mini-instruct",
+        "huggingface/Qwen/Qwen2.5-Coder-32B-Instruct",
+        "huggingface/mistralai/Mistral-7B-Instruct-v0.3",
+        "huggingface/microsoft/Phi-3.5-mini-instruct",
     ],
     messages=[
         {"role": "system", "content": PROMPT},
@@ -30,17 +34,16 @@ response = client.completions(
 )
 ```
 
-To use with OpenRouter, set the provider to `openrouter`
-
+Use with OpenRouter models:
 ```python
 # make request to OpenRouter
 client = OpenPO(api_key="<your-openrouter-api-key", provider='openrouter')
 
 response = client.completions(
     models = [
-        "qwen/qwen-2.5-coder-32b-instruct",
-        "mistralai/mistral-7b-instruct-v0.3",
-        "microsoft/phi-3.5-mini-128k-instruct",
+        "openrouter/qwen/qwen-2.5-coder-32b-instruct",
+        "openrouter/mistralai/mistral-7b-instruct-v0.3",
+        "openrouter/microsoft/phi-3.5-mini-128k-instruct",
     ],
     messages=[
         {"role": "system", "content": PROMPT},
@@ -55,8 +58,8 @@ To call models deployed on Hugging Face Inference Endpoint, simply pass in endpo
 ```python
 response = client.completions(
     models = [
-        'your-inference-endpoint-1',
-        'your-inference-endpoint-2',
+        'huggingface/your-inference-endpoint-1',
+        'huggingface/your-inference-endpoint-2',
     ],
     messages=[
         {"role": "system", "content": PROMPT},

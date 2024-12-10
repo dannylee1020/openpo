@@ -3,7 +3,7 @@ To use single model, simply pass in one model to the `models` argument
 
 ```python
 response = client.completions(
-    models=["Qwen/Qwen2.5-Coder-32B-Instruct"],
+    models=["huggingface/Qwen/Qwen2.5-Coder-32B-Instruct"],
     messages=messages
 )
 ```
@@ -13,8 +13,8 @@ If you want to get multiple responses from the same model, pass in the same mode
 ```python
 response = client.completions(
     models=[
-        "Qwen/Qwen2.5-Coder-32B-Instruct",
-        "Qwen/Qwen2.5-Coder-32B-Instruct",
+        "huggingface/Qwen/Qwen2.5-Coder-32B-Instruct",
+        "huggingface/Qwen/Qwen2.5-Coder-32B-Instruct",
     ],
     messages=messages,
     params = {
@@ -37,9 +37,9 @@ Using multiple models is as simple as passing in different model names
 ```python
 response = client.completions(
     models=[
-        "Qwen/Qwen2.5-Coder-32B-Instruct",
-        "mistralai/Mistral-7B-Instruct-v0.3",
-        "microsoft/Phi-3.5-mini-instruct",
+        "huggingface/Qwen/Qwen2.5-Coder-32B-Instruct",
+        "huggingface/mistralai/Mistral-7B-Instruct-v0.3",
+        "huggingface/microsoft/Phi-3.5-mini-instruct",
     ],
     messages=messages,
 )
@@ -54,7 +54,7 @@ response = client.completions(
 
 ```python
 response = client.completions(
-    models=[ "Qwen/Qwen2.5-Coder-32B-Instruct"],
+    models=[ "huggingface/Qwen/Qwen2.5-Coder-32B-Instruct"],
     messages=messages,
     params={
         "max_tokens": 1000,
