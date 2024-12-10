@@ -19,11 +19,11 @@ OpenPO is an open source library that simplifies the process of building synthet
 
 - 🔌 **Multiple LLM Support**: Call 200+ models from HuggingFace and OpenRouter
 
-- 🧪 **Research-Backed Methodologies**: Implementation of various methodologies on data synthesis from latest research papers. (feature coming soon!)
+- 🧪 **Research-Backed Methodologies**: Implementation of methodologies for data synthesis from latest research papers. (feature coming soon!)
 
 - 🤝 **OpenAI API Compatibility**: Support for OpenAI API format
 
-- 💾 **Flexible Storage:** Out of the box storage providers for Hugging Face and S3.
+- 💾 **Flexible Storage:** Out of the box storage providers for HuggingFace and S3.
 
 
 ## Installation
@@ -47,19 +47,18 @@ set environment variable first
 export HF_API_KEY=<your-api-key>
 export OPENROUTER_API_KEY=<your-api-key>
 ```
-OpenPO defaults to Hugging Face when provider argument is not set.
 
 ```python
 import os
 from openpo.client import OpenPO
 
-client = OpenPO(api_key="your-huggingface-api-key") # no need to pass in the key if environment variable is already set.
+client = OpenPO()
 
 response = client.completions(
     models = [
-        "Qwen/Qwen2.5-Coder-32B-Instruct",
-        "mistralai/Mistral-7B-Instruct-v0.3",
-        "microsoft/Phi-3.5-mini-instruct",
+        "huggingface/Qwen/Qwen2.5-Coder-32B-Instruct",
+        "huggingface/mistralai/Mistral-7B-Instruct-v0.3",
+        "huggingface/microsoft/Phi-3.5-mini-instruct",
     ],
     messages=[
         {"role": "system", "content": PROMPT},
@@ -76,9 +75,9 @@ client = OpenPO(api_key="<your-openrouter-api-key", provider='openrouter')
 
 response = client.completions(
     models = [
-        "qwen/qwen-2.5-coder-32b-instruct",
-        "mistralai/mistral-7b-instruct-v0.3",
-        "microsoft/phi-3.5-mini-128k-instruct",
+        "openrouter/qwen/qwen-2.5-coder-32b-instruct",
+        "openrouter/mistralai/mistral-7b-instruct-v0.3",
+        "openrouter/microsoft/phi-3.5-mini-128k-instruct",
     ],
     messages=[
         {"role": "system", "content": PROMPT},
@@ -93,9 +92,9 @@ OpenPO takes default model parameters as a dictionary. Take a look at the docume
 ```python
 response = client.completions(
     models = [
-        "Qwen/Qwen2.5-Coder-32B-Instruct",
-        "mistralai/Mistral-7B-Instruct-v0.3",
-        "microsoft/Phi-3.5-mini-instruct",
+        "huggingface/Qwen/Qwen2.5-Coder-32B-Instruct",
+        "huggingface/mistralai/Mistral-7B-Instruct-v0.3",
+        "huggingface/microsoft/Phi-3.5-mini-instruct",
     ],
     messages=[
         {"role": "system", "content": PROMPT},
@@ -137,14 +136,14 @@ OpenPO supports structured outputs using Pydantic model.
 from pydantic import BaseModel
 from openpo.client import OpenPO
 
-client = OpenPO(api_key="your-huggingface-api-key")
+client = OpenPO()
 
 class ResponseModel(BaseModel):
     response: str
 
 
 res = client.completions(
-    models=["Qwen/Qwen2.5-Coder-32B-Instruct"],
+    models=["huggingface/Qwen/Qwen2.5-Coder-32B-Instruct"],
     messages=[
         {"role": "system", "content": PROMPT},
         {"role": "system", "content": MESSAGE},
@@ -159,18 +158,18 @@ res = client.completions(
 Contributions are what makes open source amazingly special! Here's how you can help:
 
 ### Development Setup
-1. Fork and clone the repository
+1. Clone the repository
 ```bash
 git clone https://github.com/yourusername/openpo.git
 cd openpo
 ```
 
-2. Install Poetry (dependency management tool)
+1. Install Poetry (dependency management tool)
 ```bash
 curl -sSL https://install.python-poetry.org | python3 -
 ```
 
-3. Install dependencies
+1. Install dependencies
 ```bash
 poetry install
 ```
