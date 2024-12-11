@@ -1,7 +1,7 @@
 Evaluation methods are what synthesizes data to create finetuned ready datasets.
 
 ## Using LLM-as-a-Judge
-Since [Constitutional AI: Harmlessness from AI Feedback](https://arxiv.org/abs/2212.08073) from Anthropic established a groundwork for using AI feedback beyond just ensuring model safety, [Subsequent researches](resource.md/#research) have demonstrated the effectiveness of LLM-based evaluation for synthetic data generation, potentially offering a scalable alternative to human annotation.
+Since [Constitutional AI: Harmlessness from AI Feedback](https://arxiv.org/abs/2212.08073) from Anthropic established a groundwork for using AI feedback beyond just ensuring model safety, [Subsequent researches](paper.md) have demonstrated the effectiveness of LLM-based evaluation for synthetic data generation, potentially offering a scalable alternative to human annotation.
 
 OpenPO adopts what is called LLM-as-a-Judge methodology, supporting both single and multi-judge configurations to generate high-quality dataset.
 

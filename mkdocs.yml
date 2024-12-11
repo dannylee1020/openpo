@@ -77,5 +77,5 @@ nav:
   - Errors: errors.md
   - Resources:
     - Notebooks: notebook.md
-    - Research: research.md
+    - Papers: paper.md
   - API Reference: api.md

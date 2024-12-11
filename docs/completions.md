@@ -31,7 +31,7 @@ response = client.completions(
 )
 ```
 !!! TIP
-    Adjusting `temperature` and `frequency_penalty` in `pref_params` argument will vary the response from the second model.
+    Adjusting `temperature` and `frequency_penalty` in `pref_params` parameter will vary the response for the second model.
 
 ## Using Multiple Models
 

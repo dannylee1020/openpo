@@ -1,11 +1,16 @@
 Start using OpenPO in your code within a minute.
 
 ## Set your API Key
-Configure your API key of a model of your choice as an environment variable.
+Configure your API key as an environment variable.
 
 ```bash
+# for completions
 export HF_API_KEY=<your-huggingface-api-key>
 export OPENROUTER_API_KEY=<your-openrouter-api-key>
+
+# for evaluations
+export OPENAI_API_KEY=<your-openai-api-key>
+export ANTHROPIC_API_KEY=<your-anthropic-api-key>
 ```
 
 ## Basic Usage
