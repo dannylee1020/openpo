@@ -1,4 +1,7 @@
+`completions` method is responsible for collecting responses from multiple LLMs from HuggingFace and OpenRouter.
+
 ## Using Single Model
+
 To use single model, simply pass in one model to the `models` argument
 
 ```python

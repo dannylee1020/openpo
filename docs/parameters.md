@@ -1,4 +1,6 @@
 
+Following is the list of parameters for completions.
+
 ## Required Parameters
 
 ```title="models (list[str])"

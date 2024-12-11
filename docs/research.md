@@ -1,15 +1,3 @@
-
-## Tutorials
-
-Try free notebooks on Google Colab to see how to build datasets using OpenPO!
-
-
-| Resources | Notebooks |
-|:----------|:----------|
-| Building dataset with OpenPO and PairRM  | 📔 [Notebook](https://colab.research.google.com/drive/1G1T-vOTXjIXuRX3h9OlqgnE04-6IpwIf?usp=sharing) |
-
-
-## Research
 Recent advances in LLM capabilities have led to breakthrough research in synthetic data generation and automated evaluation methods. Several key studies highlight the potential of using LLMs for tasks traditionally requiring human annotators.
 
 [ChatGPT Outperforms Crowd-Workers for Text-Annotation Tasks](https://arxiv.org/abs/2303.15056) demonstrates ChatGPT's capabilities for outperforming crowd workers:
