@@ -5,7 +5,7 @@ import pandas as pd
 from anthropic import Anthropic as AnthropicClient
 from pydantic import BaseModel
 
-from openpo.internal import prompt
+from openpo.internal import prompt as prompt_lib
 
 from .base import LLMProvider
 
@@ -46,9 +46,12 @@ class Anthropic(LLMProvider):
         try:
             res = self.client.messages.create(
                 model=model,
-                system=prompt if prompt else prompt.EVALUATION_PROMPT,
+                system=prompt if prompt else prompt_lib.EVALUATION_PROMPT,
                 messages=[
-                    {"role": "user", "content": prompt.EVALUATION_QUERY.format(data)},
+                    {
+                        "role": "user",
+                        "content": prompt_lib.EVALUATION_QUERY.format(data),
+                    },
                 ],
                 max_tokens=4096,
                 tools=tools,

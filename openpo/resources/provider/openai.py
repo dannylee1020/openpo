@@ -5,7 +5,7 @@ import pandas as pd
 from openai import OpenAI as OpenAIClient
 from pydantic import BaseModel
 
-from openpo.internal import prompt
+from openpo.internal import prompt as prompt_lib
 
 from .base import LLMProvider
 
@@ -38,9 +38,9 @@ class OpenAI(LLMProvider):
         messages = [
             {
                 "role": "system",
-                "content": prompt if prompt else prompt.EVALUATION_PROMPT,
+                "content": prompt if prompt else prompt_lib.EVALUATION_PROMPT,
             },
-            {"role": "user", "content": prompt.EVALUATION_QUERY.format(data)},
+            {"role": "user", "content": prompt_lib.EVALUATION_QUERY.format(data)},
         ]
 
         try:
