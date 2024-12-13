@@ -42,15 +42,21 @@ poetry install
 ```
 
 ## Getting Started
-set environment variable first
+set your environment variable first
+
 ```bash
+# for completions
 export HF_API_KEY=<your-api-key>
 export OPENROUTER_API_KEY=<your-api-key>
+
+# for evaluations
+export OPENAI_API_KEY=<your-openai-api-key>
+export ANTHROPIC_API_KEY=<your-anthropic-api-key>
 ```
 To get started, simply pass in a list of model names of your choice
 
 > [!NOTE]
-> OpenPo requires provider name to be prepended to the model identifier.
+> OpenPO requires provider name to be prepended to the model identifier.
 
 ```python
 import os
