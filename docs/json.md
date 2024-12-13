@@ -5,7 +5,7 @@ To use structured output, use Pydantic model.
 
 ```python
 from pydantic import BaseModel
-from openpo.client import OpenPO
+from openpo import OpenPO
 
 client = OpenPO()
 

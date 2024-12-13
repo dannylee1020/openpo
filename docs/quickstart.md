@@ -21,8 +21,7 @@ To call multiple models, simply add models of your choice as a list and pass it 
     for more information.
 
 ```python
-import os
-from openpo.client import OpenPO
+from openpo import OpenPO
 
 client = OpenPO()
 

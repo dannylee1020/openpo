@@ -9,19 +9,16 @@ OpenPO simplifies building synthetic datasets by leveraging AI feedback from 200
 
 ## Key Features
 
-- 🔌 **Multiple LLM Support**: Call 200+ models from HuggingFace and OpenRouter
+- 🤖 **Multiple LLM Support**: Collect diverse set of outputs from 200+ LLMs
 
-- 🧪 **Research-Backed Methodologies**: Implementation of methodologies for data synthesis from latest research papers.
-
-- 🤝 **OpenAI API Compatibility**: Support for OpenAI API format
+- 📊 **Research-Backed Evaluation Methods**: Support for state-of-art evaluation methods for data synthesis
 
 - 💾 **Flexible Storage:** Out of the box storage providers for HuggingFace and S3.
 
 ## How It Works
 1. Collect responses from multiple models on HuggingFace or OpenRouter.
-2. Run various evaluation methods on the response data.
+2. Run out-of-the-box evaluation methods on the response data.
 3. Dataset is now ready for fine-tuning!
-
 
 
 ## Why Synthetic Datasets?

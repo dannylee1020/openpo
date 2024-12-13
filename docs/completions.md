@@ -1,4 +1,4 @@
-`completions` method is responsible for collecting responses from multiple LLMs from HuggingFace and OpenRouter.
+Completion is the building block of synthetic data generation. It allows you to easily collect outputs from any LLM of your choice.
 
 ## Using Single Model
 

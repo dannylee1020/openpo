@@ -1,9 +1,9 @@
 
-List of providers OpenPO supports
+List of providers OpenPO currently supports.
 
 ## For Completions
 
-`completions` method current supports the models from the following providers:
+`completions` method supports the models from the following providers:
 
 | Provider | Handle |
 |:----------|:----------|

@@ -3,13 +3,15 @@
 OpenPO provides storage class for S3 and HuggingFace Dataset repository out of the box. Use storage class to easily upload and download datasets.
 
 ## HuggingFace Storage
-OpenPO uses HuggingFace `push_to_hub` function under the hood. For more information on the method, refer to the [API Reference section](api.md#storage)
+`HuggingFaceStorage` class supports python object and pandas DataFrame as [input data types](api.md/#storage). To use HuggingFace as your datastore:
 
 ```python
+from openpo.storage import HuggingFaceStorage
+
 hf_storage = HuggingFaceStorage(repo_id="my-dataset-repo", api_key="hf-token") # api_key can also be set as environment variable.
 
 # push data to repo
-preference = {"prompt": "text", "preferred": "response1", "rejected": "response2"}
+preference = [{"prompt": "text", "preferred": "response1", "rejected": "response2"}]
 hf_storage.push_to_repo(data=preference)
 
 # Load data from repo
@@ -20,7 +22,7 @@ data = hf_storage.load_from_repo()
 `S3Storage` supports serialization for `json` and `parquet`. To initialize the class, you can either pass in the keyword arguments or configure aws credentials with `aws configure`
 
 ```python
-from openpo.providers.s3 import S3Storage
+from openpo.storage import S3Storage
 
 s3 = S3Storage(
     region_name="us-west-2",              # Optional: AWS region

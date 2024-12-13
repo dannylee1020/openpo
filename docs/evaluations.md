@@ -1,4 +1,4 @@
-Evaluation methods are the magic that synthesizes raw data into finetuned ready datasets. To get started with evaluation, first install extra dependencies.
+Evaluation is the magic that synthesizes outputs data into finetuned ready dataset. To get started with evaluation, first install extra dependencies.
 
 ```bash
 pip install openpo[eval]
@@ -17,6 +17,8 @@ To use a single LLM as a judge, you can use `eval_single` method.
     Evaluation currently suppports OpenAI and Anthropic models only.
 
 ```python
+from openpo import OpenPO
+
 client = OpenPO()
 
 data = [
@@ -55,7 +57,7 @@ res = openpo.eval_single(
 For more details, take a look at the [API reference](api.md)
 
 
-## Using Finetuned Evaluation Models
+## Using Evaluation Models
 !!! Note
     Evaluation Models require to run on appropriate hardware with GPU and memory to make inference.
 
@@ -75,7 +77,7 @@ To run inference with evaluation models, first install extra dependencies by run
 To run evaluation for pairwise ranking:
 
 ```python
-from openpo.resources.pairrm import PairRM
+from openpo import PairRM
 
 pairrm = PairRM()
 res = pairrm.eval(prompts, responses)
@@ -97,7 +99,7 @@ The model uses Mistral-7B and Mixtral-8x7B as the base models, and uses two type
 For pairwise ranking:
 
 ```python
-from openpo.resources.prometheus2 import Prometheus2
+from openpo import Prometheus2
 from openpo.resources.provider.vllm import VLLM
 
 model = VLLM<(model="prometheus-eval/prometheus-7b-v2.0")
