@@ -119,7 +119,11 @@ response = client.completions(
 ```
 
 ### Evaluation
-OpenPO offers various ways to synthesize your dataset.
+OpenPO offers various ways to synthesize your dataset. To run evaluation, install extra dependencies by running
+
+```bash
+pip install openpo[eval]
+```
 
 #### LLM-as-a-Judge
 To use single judge to evaluate your response data, use `eval_single`
