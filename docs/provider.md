@@ -12,7 +12,7 @@ List of providers OpenPO supports
 
 ## For Evaluations
 
-evaluations method using LLM-as-a-judge approach current supports the models from the following providers:
+LLM-as-a-judge evaluation supports models from the following providers:
 
 | Provider | Handle |
 |:----------|:----------|
