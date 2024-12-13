@@ -7,3 +7,4 @@ test.py
 dist/
 test_env/
 site/
+.DS_Store
