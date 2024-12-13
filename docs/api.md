@@ -2,8 +2,7 @@
 
 ## Client
 
-The main client interface for interacting with language models.
-
+The main client interface for interacting with LLMs.
 
 ::: openpo.client.OpenPO
 
