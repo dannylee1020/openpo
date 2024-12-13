@@ -31,6 +31,15 @@ anthropic = "^0.40.0"
 mkdocs-material = "^9.5.44"
 mkdocstrings-python = "^1.12.2"
 
+[tool.poetry.extras]
+eval = [
+    "llm-blender",
+    "prometheus-eval",
+    "vllm ",
+    "openai ",
+    "anthropic "
+]
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
