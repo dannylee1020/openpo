@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "openpo"
-version = "0.5.1"
+version = "0.5.2"
 description = "Build high quality synthetic datasets with AI feedback from 200+ LLMs"
 authors = ["Daniel Lee <dannylee1020@gmail.com>"]
 license = "Apache-2.0"
@@ -32,13 +32,7 @@ mkdocs-material = "^9.5.44"
 mkdocstrings-python = "^1.12.2"
 
 [tool.poetry.extras]
-eval = [
-    "llm-blender",
-    "prometheus-eval",
-    "vllm ",
-    "openai ",
-    "anthropic "
-]
+eval = ["llm-blender", "prometheus-eval", "vllm", "openai", "anthropic"]
 
 [build-system]
 requires = ["poetry-core"]
