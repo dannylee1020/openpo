@@ -17,11 +17,9 @@ OpenPO is an open source library that simplifies the process of building synthet
 
 ## Key Features
 
-- 🔌 **Multiple LLM Support**: Call 200+ models from HuggingFace and OpenRouter
+- 🤖 **Multiple LLM Support**: Collect diverse set of outputs from 200+ LLMs
 
-- 🧪 **Research-Backed Methodologies**: Implementation of methodologies for data synthesis from latest research papers.
-
-- 🤝 **OpenAI API Compatibility**: Support for OpenAI API format
+- 📊 **Research-Backed Evaluation Methods**: Support for state-of-art evaluation methods for data synthesis
 
 - 💾 **Flexible Storage:** Out of the box storage providers for HuggingFace and S3.
 
@@ -53,14 +51,16 @@ export OPENROUTER_API_KEY=<your-api-key>
 export OPENAI_API_KEY=<your-openai-api-key>
 export ANTHROPIC_API_KEY=<your-anthropic-api-key>
 ```
-To get started, simply pass in a list of model names of your choice
+
+### Completion
+To get started with collecting LLM responses, simply pass in a list of model names of your choice
 
 > [!NOTE]
 > OpenPO requires provider name to be prepended to the model identifier.
 
 ```python
 import os
-from openpo.client import OpenPO
+from openpo import OpenPO
 
 client = OpenPO()
 
@@ -77,7 +77,7 @@ response = client.completions(
 )
 ```
 
-You can also call models with OpenPO.
+You can also call models with OpenRouter.
 
 ```python
 # make request to OpenRouter
@@ -118,11 +118,69 @@ response = client.completions(
 
 ```
 
+### Evaluation
+OpenPO offers various ways to synthesize your dataset.
+
+#### LLM-as-a-Judge
+To use single judge to evaluate your response data, use `eval_single`
+
+```python
+client = OpenPO()
+
+res = openpo.eval_single(
+    model='openai/gpt-4o',
+    data=responses,
+)
+```
+
+To use multi judge, use `eval_multi`
+
+```python
+res = openpo.eval_multi(
+    models=["openai/gpt-4o", "anthropic/claude-sonnet-3-5-latest"],
+    data=responses,
+)
+```
+
+#### Pre-trained Models
+You can use pre-trained open source evaluation models. OpenPo currently supports two types of models: `PairRM` and `Prometheus2`.
+
+> [!NOTE]
+> Appropriate hardware with GPU and memory is required to make inference with these models.
+
+To use PairRM to rank responses:
+
+```python
+from openpo import PairRM
+
+pairrm = PairRM()
+res = pairrm.eval(prompts, responses)
+```
+
+To use Prometheus2:
+
+```python
+from openpo import Prometheus2
+from openpo.resources.provider.vllm import VLLM
+
+model = VLLM<(model="prometheus-eval/prometheus-7b-v2.0")
+pm = Prometheus2(model=model)
+
+feedback = pm.eval_relative(
+    instructions=instructions,
+    responses_A=response_A,
+    responses_B=response_B,
+    rubric='reasoning',
+)
+```
+
+
+
 ### Storing Data
 Use out of the box storage class to easily upload and download data.
 
 ```python
-from openpo.storage.huggingface import HuggingFaceStorage
+from openpo.storage import HuggingFaceStorage
 hf_storage = HuggingFaceStorage(repo_id="my-dataset-repo")
 
 # push data to repo
@@ -133,36 +191,6 @@ hf_storage.push_to_repo(data=preference)
 data = hf_storage.load_from_repo()
 ```
 
-## Structured Outputs (JSON Mode)
-OpenPO supports structured outputs using Pydantic model.
-
-> [!NOTE]
-> OpenRouter does not natively support structured outputs. This leads to inconsistent behavior from some models when structured output is used with OpenRouter.
->
-> It is recommended to use HuggingFace models for structured output.
-
-
-```python
-from pydantic import BaseModel
-from openpo.client import OpenPO
-
-client = OpenPO()
-
-class ResponseModel(BaseModel):
-    response: str
-
-
-res = client.completions(
-    models=["huggingface/Qwen/Qwen2.5-Coder-32B-Instruct"],
-    messages=[
-        {"role": "system", "content": PROMPT},
-        {"role": "system", "content": MESSAGE},
-    ],
-    params = {
-        "response_format": ResponseFormat,
-    }
-)
-```
 
 ## Contributing
 Contributions are what makes open source amazingly special! Here's how you can help:
