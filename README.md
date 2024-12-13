@@ -13,7 +13,7 @@ OpenPO simplifies building synthetic datasets for preference tuning from 200+ LL
 
 
 ## What is OpenPO?
-OpenPO is an open source library that simplifies the process of building synthetic datasets for LLM preference tuning. By collecting outputs from 200 + LLMs and evaluating them using research-proven methodologies, OpenPO helps developers build better, more fine-tuned language models with minimal effort.
+OpenPO is an open source library that simplifies the process of building synthetic datasets for LLM preference tuning. By collecting outputs from 200 + LLMs and synthesizing them using research-proven methodologies, OpenPO helps developers build better, more fine-tuned language models with minimal effort.
 
 ## Key Features
 
@@ -150,7 +150,7 @@ res = openpo.eval_multi(
 You can use pre-trained open source evaluation models. OpenPo currently supports two types of models: `PairRM` and `Prometheus2`.
 
 > [!NOTE]
-> Appropriate hardware with GPU and memory is required to make inference with these models.
+> Appropriate hardware with GPU and memory is required to make inference with pre-trained models.
 
 To use PairRM to rank responses:
 
