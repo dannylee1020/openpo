@@ -1,6 +1,6 @@
 from typing import List, Union
 
-from vllm import LLM
+from vllm import LLM, SamplingParams
 
 
 class VLLM:
