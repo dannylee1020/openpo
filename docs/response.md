@@ -1,5 +1,3 @@
-# Response Types
-
 OpenPO returns a custom response from completions that is compatible with OpenAI chat completion response.
 
 ## ChatCompletionOutput
