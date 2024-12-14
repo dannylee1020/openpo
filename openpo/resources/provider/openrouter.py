@@ -5,7 +5,7 @@ from typing import Any, Dict, Generator, List, Optional, Union
 import httpx
 
 from openpo.internal import prompt
-from openpo.internal.error import APIError
+from openpo.internal.error import AuthenticationError, ProviderError
 from openpo.internal.response import ChatCompletionOutput, ChatCompletionStreamOutput
 
 from .base import LLMProvider
@@ -21,25 +21,22 @@ class OpenRouter(LLMProvider):
 
     Attributes:
         url (str): The OpenRouter API endpoint URL.
-        api_key (str): The OpenRouter API key for authentication.
         headers (Dict[str, str]): HTTP headers used for API requests.
 
     Args:
-        api_key (str): The API key for OpenRouter. If not provided,
-            attempts to read from OPENROUTER_API_KEY environment variable.
+        api_key (str): The API key for OpenRouter.
 
     Raises:
-        ValueError: If no API key is provided or found in environment variables.
+        AuthenticationError: If no API key is provided or the key is invalid.
     """
 
-    def __init__(self, api_key):
-        self.url = "https://openrouter.ai/api/v1/chat/completions"
-        self.api_key = api_key or os.getenv("OPENROUTER_API_KEY")
-        if not self.api_key:
-            raise ValueError("API key is not provided")
+    def __init__(self, api_key: str):
+        if not api_key:
+            raise AuthenticationError("OpenRouter")
 
+        self.url = "https://openrouter.ai/api/v1/chat/completions"
         self.headers = {
-            "Authorization": f"Bearer {self.api_key}",
+            "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
         }
 
@@ -49,27 +46,54 @@ class OpenRouter(LLMProvider):
         if params.get("stream", False):
 
             def stream_generator():
-                with httpx.stream(
-                    method="POST",
-                    url=endpoint,
-                    headers=self.headers,
-                    data=json.dumps(params),
-                    timeout=45.0,
-                ) as response:
-                    response.raise_for_status()
-                    for line in response.iter_lines():
-                        if line:
-                            if not line.startswith("data:"):
-                                return None
+                try:
+                    with httpx.stream(
+                        method="POST",
+                        url=endpoint,
+                        headers=self.headers,
+                        data=json.dumps(params),
+                        timeout=45.0,
+                    ) as response:
+                        if response.status_code in [401, 403]:
+                            raise AuthenticationError(
+                                "OpenRouter",
+                                message="Invalid API key or unauthorized access",
+                                status_code=response.status_code,
+                                response=response.json() if response.content else None,
+                            )
+                        response.raise_for_status()
 
-                            if "[DONE]" in line:
-                                break
+                        for line in response.iter_lines():
+                            if line:
+                                if not line.startswith("data:"):
+                                    return None
 
-                            chunk = json.loads(line[6:])
-                            try:
-                                yield ChatCompletionStreamOutput(chunk)
-                            except json.JSONDecodeError:
-                                continue
+                                if "[DONE]" in line:
+                                    break
+
+                                chunk = json.loads(line[6:])
+                                try:
+                                    yield ChatCompletionStreamOutput(chunk)
+                                except json.JSONDecodeError:
+                                    continue
+                except httpx.HTTPStatusError as e:
+                    if e.response.status_code in [401, 403]:
+                        raise AuthenticationError(
+                            "OpenRouter",
+                            message="Invalid API key or unauthorized access",
+                            status_code=e.response.status_code,
+                            response=e.response.json() if e.response.content else None,
+                        )
+                    raise ProviderError(
+                        "OpenRouter",
+                        message=f"API request failed: {str(e)}",
+                        status_code=e.response.status_code,
+                        response=e.response.json() if e.response.content else None,
+                    )
+                except Exception as e:
+                    raise ProviderError(
+                        "OpenRouter", message=f"Stream request failed: {str(e)}"
+                    )
 
             return stream_generator()
         else:
@@ -81,16 +105,32 @@ class OpenRouter(LLMProvider):
                         data=json.dumps(params),
                         timeout=45.0,
                     )
+                    if response.status_code in [401, 403]:
+                        raise AuthenticationError(
+                            "OpenRouter",
+                            message="Invalid API key or unauthorized access",
+                            status_code=response.status_code,
+                            response=response.json() if response.content else None,
+                        )
                     response.raise_for_status()
                     return ChatCompletionOutput(response.json())
 
             except httpx.HTTPStatusError as e:
-                raise APIError(
-                    f"API request to {endpoint} failed",
+                if e.response.status_code in [401, 403]:
+                    raise AuthenticationError(
+                        "OpenRouter",
+                        message="Invalid API key or unauthorized access",
+                        status_code=e.response.status_code,
+                        response=e.response.json() if e.response.content else None,
+                    )
+                raise ProviderError(
+                    "OpenRouter",
+                    message=f"API request failed: {str(e)}",
                     status_code=e.response.status_code,
                     response=e.response.json() if e.response.content else None,
-                    error=str(e),
                 )
+            except Exception as e:
+                raise ProviderError("OpenRouter", message=f"Request failed: {str(e)}")
 
     def generate(
         self,
@@ -130,7 +170,8 @@ class OpenRouter(LLMProvider):
                 stream generators depending on the stream parameter.
 
         Raises:
-            Exception: If there's an error during the API request or response processing.
+            AuthenticationError: If the API key is invalid or expired.
+            ProviderError: If there's an error during the API request or response processing.
         """
         try:
             if params is None:
@@ -158,5 +199,9 @@ class OpenRouter(LLMProvider):
             res = self._make_api_request(endpoint=self.url, params=body)
 
             return res
+        except (AuthenticationError, ProviderError) as e:
+            raise e
         except Exception as e:
-            raise Exception(f"Error calling model from OpenRouter {e}")
+            raise ProviderError(
+                "OpenRouter", message=f"Error generating completion: {str(e)}"
+            )

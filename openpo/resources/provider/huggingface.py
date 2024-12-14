@@ -2,6 +2,9 @@ import os
 from typing import Any, Dict, List, Optional
 
 from huggingface_hub import InferenceClient
+from huggingface_hub.utils import HfHubHTTPError
+
+from openpo.internal.error import AuthenticationError, ProviderError
 
 from .base import LLMProvider
 
@@ -15,23 +18,26 @@ class HuggingFace(LLMProvider):
     for generating text completions.
 
     Attributes:
-        api_key (str): The HuggingFace API key for authentication.
         client (InferenceClient): The HuggingFace inference client instance.
 
     Args:
-        api_key (Optional[str]): The API key for HuggingFace. If not provided,
-            attempts to read from HF_API_KEY environment variable.
+        api_key (str): The API key for HuggingFace.
 
     Raises:
-        ValueError: If no API key is provided or found in environment variables.
+        AuthenticationError: If no API key is provided or the key is invalid.
+        ProviderError: If there's an error initializing the HuggingFace client.
     """
 
-    def __init__(self, api_key: Optional[str] = None):
-        self.api_key = api_key or os.getenv("HF_API_KEY")
-        if not self.api_key:
-            raise ValueError("API key is not provided")
-
-        self.client = InferenceClient(api_key=self.api_key)
+    def __init__(self, api_key: str):
+        if not api_key:
+            raise AuthenticationError("HuggingFace")
+        try:
+            self.client = InferenceClient(api_key=api_key)
+        except Exception as e:
+            raise AuthenticationError(
+                "HuggingFace",
+                message=f"Failed to initialize HuggingFace client: {str(e)}",
+            )
 
     def generate(
         self,
@@ -66,12 +72,12 @@ class HuggingFace(LLMProvider):
                 - pref_params (Optional[Dict[str, Any]]): Model-specific parameters
 
         Returns:
-            ChatCompletionOutput | ChatCOmpletionStreamOutput: Response from the model.
+            ChatCompletionOutput | ChatCompletionStreamOutput: Response from the model.
 
         Raises:
-            Exception: If there's an error calling the HuggingFace API.
+            AuthenticationError: If the API key is invalid or expired.
+            ProviderError: If there's an error calling the HuggingFace API.
         """
-
         try:
             if params is None:
                 params = {}
@@ -93,5 +99,21 @@ class HuggingFace(LLMProvider):
             res = self.client.chat_completion(model=model, messages=messages, **params)
 
             return res
+        except HfHubHTTPError as e:
+            if e.response.status_code in [401, 403]:
+                raise AuthenticationError(
+                    "HuggingFace",
+                    message=str(e),
+                    status_code=e.response.status_code,
+                    response=e.response.json() if e.response.content else None,
+                )
+            raise ProviderError(
+                "HuggingFace",
+                message=str(e),
+                status_code=e.response.status_code,
+                response=e.response.json() if e.response.content else None,
+            )
         except Exception as e:
-            raise Exception(f"Error calling model from HuggingFace: {e}")
+            raise ProviderError(
+                "HuggingFace", message=f"Error calling model from HuggingFace: {str(e)}"
+            )

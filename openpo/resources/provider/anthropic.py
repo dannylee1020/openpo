@@ -6,6 +6,7 @@ from anthropic import Anthropic as AnthropicClient
 from pydantic import BaseModel
 
 from openpo.internal import prompt as prompt_lib
+from openpo.internal.error import AuthenticationError, ProviderError
 
 from .base import LLMProvider
 
@@ -22,12 +23,15 @@ class Response(BaseModel):
 
 
 class Anthropic(LLMProvider):
-    def __init__(self):
-        self.api_key = os.getenv("ANTHROPIC_API_KEY")
-        if not self.api_key:
-            raise ValueError("No API key provided")
-
-        self.client = AnthropicClient(api_key=self.api_key)
+    def __init__(self, api_key: str):
+        if not api_key:
+            raise AuthenticationError("Anthropic")
+        try:
+            self.client = AnthropicClient(api_key=api_key)
+        except Exception as e:
+            raise AuthenticationError(
+                "Anthropic", message=f"Failed to initialize Anthropic client: {str(e)}"
+            )
 
     def generate(
         self,
@@ -59,5 +63,8 @@ class Anthropic(LLMProvider):
             )
 
             return res
+
         except Exception as e:
-            raise Exception(f"request to Anthropic model failed: {e}")
+            raise ProviderError(
+                "Anthropic", message=f"Request to Anthropic model failed: {str(e)}"
+            )
