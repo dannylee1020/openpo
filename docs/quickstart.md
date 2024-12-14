@@ -1,7 +1,7 @@
 Start using OpenPO in your code in minutes.
 
 ## Set your API Key
-Configure your API key as an environment variable. You can also pass the key into the client if you wish.
+Configure your API key as an environment variable. You can also pass the keyㄴ into the client.
 
 ```bash
 # for completions
