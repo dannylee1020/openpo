@@ -32,10 +32,9 @@ class PairRM:
                         "prompt": prompts[i],
                         "preferred": responses[i][np.where(ranks[i] == 1)[0][0]],
                         "rejected": responses[i][
-                            np.where(ranks[i] == max(ranks[i]))[0][
-                                0
-                            ]  # Fixed: ranks[0] to ranks[i]
+                            np.where(ranks[i] == max(ranks[i]))[0][0]
                         ],
+                        "ranks": ranks[i],
                     }
                 )
             except (ValueError, IndexError):
