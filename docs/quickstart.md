@@ -1,7 +1,7 @@
-Start using OpenPO in your code within a minute.
+Start using OpenPO in your code in minutes.
 
 ## Set your API Key
-Configure your API key as an environment variable.
+Configure your API key as an environment variable. You can also pass the key into the client if you wish.
 
 ```bash
 # for completions
@@ -40,8 +40,7 @@ response = client.completions(
 
 Use with OpenRouter models:
 ```python
-# make request to OpenRouter
-client = OpenPO(api_key="<your-openrouter-api-key", provider='openrouter')
+client = OpenPO()
 
 response = client.completions(
     models = [
