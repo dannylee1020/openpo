@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional, Union
 
 import pandas as pd
 
+from .internal.error import AuthenticationError, ProviderError
 from .internal.response import ChatCompletionOutput, ChatCompletionStreamOutput
 from .resources.provider.anthropic import Anthropic
 from .resources.provider.huggingface import HuggingFace
@@ -16,20 +17,56 @@ class OpenPO:
     Main client class for interacting with various LLM providers.
 
     This class serves as the primary interface for making completion requests to different
-    language model providers.
+    language model providers. OpenPO takes optional api_key arguments for initialization.
+
     """
 
+    def __init__(
+        self,
+        hf_api_key: Optional[str] = None,
+        openrouter_api_key: Optional[str] = None,
+        openai_api_key: Optional[str] = None,
+        anthropic_api_key: Optional[str] = None,
+    ):
+        self.hf_api_key = hf_api_key or os.getenv("HF_API_KEY")
+        self.openrouter_api_key = openrouter_api_key or os.getenv("OPENROUTER_API_KEY")
+        self.openai_api_key = openai_api_key or os.getenv("OPENAI_API_KEY")
+        self.anthropic_api_key = anthropic_api_key or os.getenv("ANTHROPIC_API_KEY")
+
     def _get_model_provider(self, model: str) -> str:
-        return model.split("/")[0]
+        try:
+            return model.split("/")[0]
+        except IndexError:
+            raise ValueError("Invalid model format. Expected format: provider/model-id")
 
     def _get_model_id(self, model: str) -> str:
-        return model.split("/", 1)[1]
+        try:
+            return model.split("/", 1)[1]
+        except IndexError:
+            raise ValueError("Invalid model format. Expected format: provider/model-id")
 
     def _get_provider_instance(self, provider: str):
         if provider == "huggingface":
-            return HuggingFace(api_key=os.getenv("HF_API_KEY"))
-        else:
-            return OpenRouter(api_key=os.getenv("OPENROUTER_API_KEY"))
+            if not self.hf_api_key:
+                raise AuthenticationError("HuggingFace")
+            return HuggingFace(api_key=self.hf_api_key)
+
+        if provider == "openrouter":
+            if not self.openrouter_api_key:
+                raise AuthenticationError("OpenRouter")
+            return OpenRouter(api_key=self.openrouter_api_key)
+
+        if provider == "openai":
+            if not self.openai_api_key:
+                raise AuthenticationError("OpenAI")
+            return OpenAI(api_key=self.openai_api_key)
+
+        if provider == "anthropic":
+            if not self.anthropic_api_key:
+                raise AuthenticationError("Anthropic")
+            return Anthropic(api_key=self.anthropic_api_key)
+
+        raise ProviderError(provider, "Unsupported model provider")
 
     def _get_model_consensus(
         self,
@@ -64,6 +101,11 @@ class OpenPO:
 
         Returns:
             The response from the LLM provider containing the generated completions.
+
+        Raises:
+            AuthenticationError: If required API keys are missing or invalid.
+            ProviderError: For provider-specific errors during completion generation.
+            ValueError: If the model format is invalid.
         """
         responses = []
 
@@ -75,8 +117,14 @@ class OpenPO:
 
                 res = llm.generate(model=model_id, messages=messages, params=params)
                 responses.append(res)
+            except (AuthenticationError, ValueError) as e:
+                # Re-raise authentication and validation errors as is
+                raise e
             except Exception as e:
-                raise Exception(f"Failed to execute chat completions: {e}")
+                raise ProviderError(
+                    provider=provider,
+                    message=f"Failed to execute chat completions: {str(e)}",
+                )
 
         return responses
 
@@ -94,29 +142,36 @@ class OpenPO:
             prompt (str): Optional custom prompt for judge model to follow.
 
         Returns: The evaluation data for responses with preferred, rejected, confidence_score and reason.
+
+        Raises:
+            AuthenticationError: If required API keys are missing or invalid.
+            ProviderError: For provider-specific errors during evaluation.
+            ValueError: If the model format is invalid or provider is not supported.
         """
-
-        provider = self._get_model_provider(model)
-        model_id = self._get_model_id(model)
-
-        if provider == "openai":
-            llm = OpenAI()
-        elif provider == "anthropic":
-            llm = Anthropic()
-        else:
-            raise ValueError("provider not supported for annotation")
         try:
+            provider = self._get_model_provider(model)
+            model_id = self._get_model_id(model)
+
+            if provider not in ["openai", "anthropic"]:
+                raise ProviderError(provider, "Provider not supported for evaluation")
+
+            llm = self._get_provider_instance(provider=provider)
             res = llm.generate(
                 model=model_id,
                 data=data,
                 prompt=prompt if prompt else None,
             )
+
             if provider == "anthropic":
                 return res.content[0].input
 
             return res.choices[0].message.content
+        except (AuthenticationError, ValueError) as e:
+            raise e
         except Exception as e:
-            raise (f"error annotating dataset: {e}")
+            raise ProviderError(
+                provider=provider, message=f"Error during evaluation: {str(e)}"
+            )
 
     def eval_multi(
         self,
@@ -132,39 +187,57 @@ class OpenPO:
             prompt (str): Optional custom prompt for judge model to follow.
 
         Returns: The evaluation data for responses that all models agree on.
+
+        Raises:
+            AuthenticationError: If required API keys are missing or invalid.
+            ProviderError: For provider-specific errors during evaluation.
+            ValueError: If the model format is invalid or required models are missing.
         """
+        try:
+            judge_a = self._get_provider_instance("anthropic")
+            judge_o = self._get_provider_instance("openai")
 
-        judge_a = Anthropic()
-        judge_o = OpenAI()
+            a_model = ""
+            o_model = ""
 
-        a_model = ""
-        o_model = ""
+            for m in models:
+                provider = self._get_model_provider(m)
+                if provider == "anthropic":
+                    a_model = self._get_model_id(m)
+                elif provider == "openai":
+                    o_model = self._get_model_id(m)
+                else:
+                    raise ProviderError(
+                        provider, "Provider not supported for evaluation"
+                    )
 
-        for m in models:
-            provider = self._get_model_provider(m)
+            if not a_model or not o_model:
+                raise ValueError("Both Anthropic and OpenAI models must be provided")
 
-            if provider == "anthropic":
-                a_model = self._get_model_id(m)
-            else:
-                o_model = self._get_model_id(m)
+            res_a = judge_a.generate(
+                model=a_model,
+                data=data,
+                prompt=prompt if prompt else None,
+            )
+            parsed_res_a = res_a.content[0].input["preference"]
 
-        res_a = judge_a.generate(
-            model=a_model,
-            data=data,
-            prompt=prompt if prompt else None,
-        )
-        parsed_res_a = res_a.content[0].input["preference"]
+            res_o = judge_o.generate(
+                model=o_model,
+                data=data,
+                prompt=prompt if prompt else None,
+            )
+            parsed_res_o = json.loads(res_o.choices[0].message.content)["preference"]
 
-        res_o = judge_o.generate(
-            model=o_model,
-            data=data,
-            prompt=prompt if prompt else None,
-        )
-        parsed_res_o = json.loads(res_o.choices[0].message.content)["preference"]
+            idx = self._get_model_consensus(
+                parsed_res_a,
+                parsed_res_o,
+            )
 
-        idx = self._get_model_consensus(
-            parsed_res_a,
-            parsed_res_o,
-        )
-
-        return {"preference": [parsed_res_o[i] for i in idx]}
+            return {"preference": [parsed_res_o[i] for i in idx]}
+        except (AuthenticationError, ValueError) as e:
+            raise e
+        except Exception as e:
+            raise ProviderError(
+                provider="multi-eval",
+                message=f"Error during multi-model evaluation: {str(e)}",
+            )
