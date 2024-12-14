@@ -14,10 +14,10 @@ export ANTHROPIC_API_KEY=<your-anthropic-api-key>
 ```
 
 ## Basic Usage
-To call multiple models, simply add models of your choice as a list and pass it to the `completions` method.
+To call multiple models, simply add models of your choice to a list and pass it into the `completions` method.
 
 !!! Note
-    OpenPO requires provider name to be prepended to the model identifier. Refer to the [provider section of the documentation](provider.md)
+    OpenPO requires provider name to be prepended to the model identifier in `provider/model-id` format. Refer to the [provider section of the documentation](provider.md)
     for more information.
 
 ```python
