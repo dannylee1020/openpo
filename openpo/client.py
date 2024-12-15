@@ -131,14 +131,16 @@ class OpenPO:
     def eval_single(
         self,
         model: str,
-        data: List[List],
+        questions: List[str],
+        responses: List[List[str]],
         prompt: Optional[str] = None,
     ):
         """Use single LLM-as-a-judge method to evaluate responses for building preference data.
 
         Args:
             model (str): Model identifier to use as a judge. Follows provider/model-identifier format.
-            data (List[List]): Pairwise responses to evaluate.
+            questions (List(str)): Questions for each response pair.
+            responses (List[List[str]]): Pairwise responses to evaluate.
             prompt (str): Optional custom prompt for judge model to follow.
 
         Returns: The evaluation data for responses with preferred, rejected, confidence_score and reason.
@@ -158,7 +160,8 @@ class OpenPO:
             llm = self._get_provider_instance(provider=provider)
             res = llm.generate(
                 model=model_id,
-                data=data,
+                questions=questions,
+                responses=responses,
                 prompt=prompt if prompt else None,
             )
 
@@ -173,10 +176,12 @@ class OpenPO:
                 provider=provider, message=f"Error during evaluation: {str(e)}"
             )
 
+    # TODO: need to include index of each question so that user knows which data corresponds to which question.
     def eval_multi(
         self,
         models: List[str],
-        data: List[List],
+        questions: List[str],
+        responses: List[List],
         prompt: Optional[str] = None,
     ):
         """Use multiple LLMs as a judge for model consensus to evaluate responses for building preference data.
@@ -216,14 +221,16 @@ class OpenPO:
 
             res_a = judge_a.generate(
                 model=a_model,
-                data=data,
+                questions=questions,
+                responses=responses,
                 prompt=prompt if prompt else None,
             )
             parsed_res_a = res_a.content[0].input["preference"]
 
             res_o = judge_o.generate(
                 model=o_model,
-                data=data,
+                questions=questions,
+                responses=responses,
                 prompt=prompt if prompt else None,
             )
             parsed_res_o = json.loads(res_o.choices[0].message.content)["preference"]
