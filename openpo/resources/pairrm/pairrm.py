@@ -1,6 +1,5 @@
 from typing import List
 
-import llm_blender
 import numpy as np
 
 
@@ -14,6 +13,13 @@ class PairRM:
     """
 
     def __init__(self):
+        try:
+            import llm_blender
+        except ImportError:
+            raise ImportError(
+                "PairRM requires additional dependencies. Install with: pip install openpo[eval]"
+            )
+
         self.blender = llm_blender.Blender()
         self.blender.loadranker("llm-blender/PairRM")
 

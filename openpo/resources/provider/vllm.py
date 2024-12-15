@@ -1,7 +1,5 @@
 from typing import List, Union
 
-from vllm import LLM, SamplingParams
-
 
 class VLLM:
     def __init__(
@@ -9,6 +7,13 @@ class VLLM:
         model: str,
         **vllm_kwargs,
     ) -> None:
+        try:
+            from vllm import LLM, SamplingParams
+        except ImportError:
+            raise ImportError(
+                "vLLM requires additional dependencies. Install with: pip install openpo[eval]"
+            )
+
         self.model = LLM(
             model=model,
             **vllm_kwargs,

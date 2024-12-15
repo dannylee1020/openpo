@@ -1,16 +1,5 @@
 from typing import List, Tuple
 
-from prometheus_eval import PrometheusEval
-from prometheus_eval.prompts import (
-    ABSOLUTE_PROMPT_WO_REF,
-    FACTUAL_VALIDITY_RUBRIC,
-    HARMLESSNESS_RUBRIC,
-    HELPFULNESS_RUBRIC,
-    HONESTY_RUBRIC,
-    REASONING_RUBRIC,
-    RELATIVE_PROMPT_WO_REF,
-)
-
 
 class Prometheus2:
     """
@@ -22,6 +11,22 @@ class Prometheus2:
     """
 
     def __init__(self, model):
+        try:
+            from prometheus_eval import (
+                ABSOLUTE_PROMPT_WO_REF,
+                FACTUAL_VALIDITY_RUBRIC,
+                HARMLESSNESS_RUBRIC,
+                HELPFULNESS_RUBRIC,
+                HONESTY_RUBRIC,
+                REASONING_RUBRIC,
+                RELATIVE_PROMPT_WO_REF,
+                PrometheusEval,
+            )
+        except ImportError:
+            raise ImportError(
+                "Prometheus2 requires additional dependencies. Install with: pip install openpo[eval]"
+            )
+
         self.model = model
         self.rubric_mapping = {
             "factual-validity": FACTUAL_VALIDITY_RUBRIC,
