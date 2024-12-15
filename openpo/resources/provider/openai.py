@@ -37,7 +37,8 @@ class OpenAI(LLMProvider):
     def generate(
         self,
         model: str,
-        data: Union[List[Dict[str, Any]], pd.DataFrame],
+        questions: List[str],
+        responses: List[List],
         prompt: Optional[str] = None,
     ):
         messages = [
@@ -45,7 +46,10 @@ class OpenAI(LLMProvider):
                 "role": "system",
                 "content": prompt if prompt else prompt_lib.EVALUATION_PROMPT,
             },
-            {"role": "user", "content": prompt_lib.EVALUATION_QUERY.format(data)},
+            {
+                "role": "user",
+                "content": prompt_lib.EVALUATION_QUERY.format(questions, responses),
+            },
         ]
 
         try:

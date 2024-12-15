@@ -36,7 +36,8 @@ class Anthropic(LLMProvider):
     def generate(
         self,
         model: str,
-        data: Union[List[Dict[str, Any]], pd.DataFrame],
+        questions: List[str],
+        responses: List[List],
         prompt: Optional[str] = None,
     ):
         tools = [
@@ -54,7 +55,9 @@ class Anthropic(LLMProvider):
                 messages=[
                     {
                         "role": "user",
-                        "content": prompt_lib.EVALUATION_QUERY.format(data),
+                        "content": prompt_lib.EVALUATION_QUERY.format(
+                            questions, responses
+                        ),
                     },
                 ],
                 max_tokens=4096,
