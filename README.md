@@ -10,6 +10,7 @@ OpenPO simplifies building synthetic datasets for preference tuning from 200+ LL
 | Resources | Notebooks |
 |----------|----------|
 | Building dataset with OpenPO and PairRM  |📔 [Notebook](https://colab.research.google.com/drive/1G1T-vOTXjIXuRX3h9OlqgnE04-6IpwIf?usp=sharing) |
+| Using OpenPO with Prometheus 2 | 📔 [Notebook](https://colab.research.google.com/drive/1dro0jX1MOfSg0srfjA_DZyeWIWKOuJn2?usp=sharing) |
 
 
 ## What is OpenPO?
