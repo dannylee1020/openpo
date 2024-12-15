@@ -8,14 +8,14 @@ OpenPO provides storage class for S3 and HuggingFace Dataset repository out of t
 ```python
 from openpo.storage import HuggingFaceStorage
 
-hf_storage = HuggingFaceStorage(repo_id="my-dataset-repo", api_key="hf-token") # api_key can also be set as environment variable.
+hf_storage = HuggingFaceStorage(api_key="hf-token") # api_key can also be set as environment variable.
 
 # push data to repo
 preference = [{"prompt": "text", "preferred": "response1", "rejected": "response2"}]
-hf_storage.push_to_repo(data=preference)
+hf_storage.push_to_repo(repo_id="my-hf-repo", data=preference)
 
 # Load data from repo
-data = hf_storage.load_from_repo()
+data = hf_storage.load_from_repo(path="my-hf-repo")
 ```
 
 ## S3 Storage

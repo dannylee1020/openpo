@@ -166,7 +166,7 @@ To use Prometheus2:
 
 ```python
 from openpo import Prometheus2
-from openpo.resources.provider.vllm import VLLM
+from openpo.resources.provider import VLLM
 
 model = VLLM<(model="prometheus-eval/prometheus-7b-v2.0")
 pm = Prometheus2(model=model)
@@ -186,14 +186,14 @@ Use out of the box storage class to easily upload and download data.
 
 ```python
 from openpo.storage import HuggingFaceStorage
-hf_storage = HuggingFaceStorage(repo_id="my-dataset-repo")
+hf_storage = HuggingFaceStorage()
 
 # push data to repo
 preference = {"prompt": "text", "preferred": "response1", "rejected": "response2"}
-hf_storage.push_to_repo(data=preference)
+hf_storage.push_to_repo(repo_id="my-hf-repo", data=preference)
 
 # Load data from repo
-data = hf_storage.load_from_repo()
+data = hf_storage.load_from_repo(path="my-hf-repo")
 ```
 
 
