@@ -67,6 +67,7 @@ class Prometheus2:
             dataset.append(
                 {
                     "prompt": instructions[i],
+                    "score": scores[i],
                     "preferred": responses_A[i] if scores[i] == "A" else responses_B[i],
                     "rejected": responses_A[i] if scores[i] == "B" else responses_B[i],
                     "feedback": feedbacks[i],
