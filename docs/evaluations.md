@@ -100,7 +100,7 @@ For pairwise ranking:
 
 ```python
 from openpo import Prometheus2
-from openpo.resources.provider.vllm import VLLM
+from openpo.resources.provider import VLLM
 
 model = VLLM<(model="prometheus-eval/prometheus-7b-v2.0")
 pm = Prometheus2(model=model)
@@ -137,6 +137,7 @@ feedback = pm.eval_absolute(
 )
 ```
 
+For full example of how to use Prometheus 2, check out the [tutorial notebook](notebook.md)!
 
 For more information about the model, refer to their [github repository](https://github.com/prometheus-eval/prometheus-eval)
 
