@@ -6,6 +6,8 @@ import boto3
 import pandas as pd
 from botocore.exceptions import ClientError
 
+from openpo.internal.error import ProviderError
+
 
 class S3Storage:
     """Storage adapter for Amazon S3.
@@ -25,11 +27,18 @@ class S3Storage:
             Alternatively, credentials can be configured with aws configure
 
     Raises:
-        ClientError: If S3 initialization fails.
+        ProviderError: If S3 Client error is raised
+
     """
 
     def __init__(self, **kwargs):
-        self.s3 = boto3.client("s3", **kwargs)
+        try:
+            self.s3 = boto3.client("s3", **kwargs)
+        except ClientError as e:
+            raise ProviderError(
+                provider="s3",
+                message=f"Failed to initialize boto3 client: {str(e)}",
+            )
 
     def _read_file(self, bucket: str, key: str) -> List[Dict[str, Any]]:
         try:
@@ -135,7 +144,10 @@ class S3Storage:
             )
 
         except ClientError as err:
-            raise err
+            raise ProviderError(
+                provider="s3",
+                message=f"Failed to push data to s3: {str(err)}",
+            )
 
     def load_from_s3(self, bucket: str, key: str) -> List[Dict[str, Any]]:
         """Read data from an S3 bucket.

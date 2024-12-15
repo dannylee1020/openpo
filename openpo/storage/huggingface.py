@@ -10,7 +10,8 @@ from datasets import (
     IterableDatasetDict,
     load_dataset,
 )
-from huggingface_hub import HfApi, create_repo, hf_hub_download, upload_file
+
+from openpo.internal.error import AuthenticationError, ProviderError
 
 
 class HuggingFaceStorage:
@@ -25,17 +26,17 @@ class HuggingFaceStorage:
         api_key (str): HuggingFace API token with write access. Environment variable can be set instead of passing in the key.
 
     Raises:
-        Exception: If repository initialization fails.
+        AuthenticationError: If authentication fails
+        ProviderError: If HuggingFace error is raised
     """
 
-    def __init__(self, repo_id: str, api_key: Optional[str] = None):
-        self.repo_id = repo_id
-        self.api = HfApi(token=api_key or os.getenv("HF_API_KEY"))
-
-        try:
-            create_repo(repo_id, token=api_key, repo_type="dataset", exist_ok=True)
-        except Exception as e:
-            raise Exception(f"Failed to initialize HuggingFace repository: {str(e)}")
+    def __init__(self, api_key: Optional[str] = None):
+        self.api_key = api_key or os.getenv("HF_API_KEY")
+        if not self.api_key:
+            raise AuthenticationError(
+                provider="Huggingface",
+                message=f"HuggingFace API key must be provided.",
+            )
 
     def _convert_to_dict(self, data: List[Dict[str, Any]]) -> Dict:
         if not data:
@@ -47,8 +48,8 @@ class HuggingFaceStorage:
 
     def push_to_repo(
         self,
+        repo_id: str,
         data: Union[List[Dict[str, Any]], pd.DataFrame],
-        repo_id: Optional[str] = None,
         config_name: str = "default",
         set_default: Optional[bool] = None,
         split: Optional[str] = None,
@@ -74,10 +75,7 @@ class HuggingFaceStorage:
                 - List[Dict]
                 - pandas DataFrame
 
-            repo_id (Optional[str]): Name of the dataset repository.
-
-                - None: defaults to repo_id passed when initializing client
-                - str: name of the dataset repository
+            repo_id (str): Name of the dataset repository.
 
         Raises:
             Exception: If pushing to dataset repository fails.
@@ -95,7 +93,7 @@ class HuggingFaceStorage:
 
         try:
             ds.push_to_hub(
-                repo_id=repo_id or self.repo_id,
+                repo_id=repo_id,
                 config_name=config_name,
                 set_default=set_default,
                 split=split,
@@ -111,11 +109,14 @@ class HuggingFaceStorage:
                 embed_external_files=embed_external_files,
             )
         except Exception as e:
-            raise (f"Error pushing data to the repository: {e}")
+            raise ProviderError(
+                provider="huggingface storage",
+                message=f"Error pushing data to the repository: {str(e)}",
+            )
 
     def load_from_repo(
         self,
-        path: Optional[str] = None,
+        path: str,
         name: Optional[str] = None,
         data_dir: Optional[str] = None,
         data_files: Optional[
@@ -143,11 +144,7 @@ class HuggingFaceStorage:
         For arguments not listed here, check HuggingFace documentation for more detail.
 
         Args:
-            path (Optional[str]): Path or name of the dataset.
-
-                - None: If not passed, defaults to repo_id given when initializing client
-                - str: repository name or path
-
+            path (str): Path or name of the dataset.
 
         Raises:
             Exception: If loading data from repository fails.
@@ -155,7 +152,7 @@ class HuggingFaceStorage:
 
         try:
             return load_dataset(
-                path=path or self.repo_id,
+                path=path,
                 name=name,
                 data_dir=data_dir,
                 data_files=data_files,
@@ -176,4 +173,7 @@ class HuggingFaceStorage:
                 **config_kwargs,
             )
         except Exception as e:
-            raise ("Error loading data from the repository")
+            raise ProviderError(
+                provider="huggingface storage",
+                message=f"Error loading data from the HF repository: {str(e)}",
+            )
