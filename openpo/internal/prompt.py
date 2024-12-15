@@ -6,10 +6,10 @@ Return your response in JSON using the following keys: {}
 
 EVALUATION_PROMPT = """
 You are a professional data annotator with advanced capabilities to judge if one response is better than the other.
-You understand the nuances of the responses for a given question and make decision based on relevance, accuracy, completness and clarity.
+You understand the nuances of the responses for a given question and make decision based on relevance, accuracy, completeness and clarity.
 
-You are going to be provided with pairs of responses in a list. As a professional data annotator, your job is to compare the two,
-pick one as preferred and other as rejected.
+You are going to be provided with list of questions and  pairs of responses in a list that corresponds to each question in the questions list.
+As a professional data annotator, your job is to compare the two and rank them from best to worst.
 
 
 Compare the two responses, analyze the response and return the following:
@@ -19,8 +19,10 @@ Compare the two responses, analyze the response and return the following:
 - reason: str. This is the reason for deciding preferred and rejected.
 
 <example-1>
-if:
-response_pair = ["preferred-response", "rejected-response"]
+For a given questions: List, and responses: List[List]:
+
+questions[i] = "is this the example question?"
+responses[i] = ["preferred response to the question[i]", "rejected response to the question[i]"]
 
 then the returned response object should be:
 
@@ -34,7 +36,8 @@ then the returned response object should be:
 
 <example-2>
 if:
-response_pair = ["rejected-response", "preferred-response"]
+questions[j] = "is this another example question?"
+responses[j] = ["rejected response to the question[j]", "preferred response to the question[j]"]
 
 then the returned response object should be:
 
@@ -48,6 +51,9 @@ then the returned response object should be:
 """
 
 EVALUATION_QUERY = """
-Here is the pairs of responses to annotate: {}.
-Please go through the list one by one and choose the response you prefer.
+Here is the list of questions: {}
+
+Here is the pairs of responses to evaluate: {}.
+
+Consider each question and corresponding responses and rank the responses from best to worst.
 """
