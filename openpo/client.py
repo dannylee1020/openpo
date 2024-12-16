@@ -184,7 +184,8 @@ class OpenPO:
 
         Args:
             models (List): List of models to use as a judge. Follows provider/model-identifier format.
-            data (List[List]): Pairwise responses to evaluate.
+            questions (List(str)): Questions for each response pair.
+            responses (List[List[str]]): Pairwise responses to evaluate.
             prompt (str): Optional custom prompt for judge model to follow.
 
         Returns (Dict): The evaluation data for responses that all models agree on.

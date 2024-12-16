@@ -22,7 +22,6 @@ class HuggingFaceStorage:
     and download operations.
 
     Parameters:
-        repo_id (str): The repository identifier on HuggingFace.
         api_key (str): HuggingFace API token with write access. Environment variable can be set instead of passing in the key.
 
     Raises:
