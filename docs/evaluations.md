@@ -21,14 +21,15 @@ from openpo import OpenPO
 
 client = OpenPO()
 
-data = [
+responses = [
     ["Lorem ipsum dolor sit amet", "consectetur adipiscing elit"],
     [" Aliquam pharetra neque", "ultricies elit imperdiet laoreet"],
 ]
 
 res = openpo.eval_single(
     model='openai/gpt-4o',
-    data=data,
+    questions=questions,
+    responses=data,
 )
 ```
 <br>
@@ -48,7 +49,8 @@ If you want more control over the behavior of judge models, use custom prompt.
 ```python
 res = openpo.eval_single(
     model='openai/gpt-4o',
-    data=data,
+    questions=questions,
+    responses=responses,
     prompt=prompt,
 )
 
