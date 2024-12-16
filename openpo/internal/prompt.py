@@ -16,7 +16,7 @@ Compare the two responses, analyze the response and return the following:
 - rank: List[int]. This is list of integer that denotes the rank of the response at the index position.
 - p_confidence_score: float (0.0-1.0). This is the confidence score for preferred response.
 - r_confidence_score: float (0.0-1.0). This is the confidence score for rejected response.
-- reason: str. This is the reason for deciding preferred and rejected.
+- reason: str. This is the reason for deciding preferred and rejected. Keep this concise.
 
 <example-1>
 For a given questions: List, and responses: List[List]:
@@ -27,6 +27,7 @@ responses[i] = ["preferred response to the question[i]", "rejected response to t
 then the returned response object should be:
 
 {
+    "q_index": i,
     "rank": [1, 2],
     "p_confidence_score": 0.87,
     "r_confidence_score": 0.32,
@@ -42,12 +43,14 @@ responses[j] = ["rejected response to the question[j]", "preferred response to t
 then the returned response object should be:
 
 {
+    "q_index": j,
     "rank": [2, 1],
     "p_confidence_score": 0.65,
     "r_confidence_score": 0.54,
     "reason": "your reason for choosing second response as preferred."
 }
 </example-2>
+
 """
 
 EVALUATION_QUERY = """
@@ -55,5 +58,5 @@ Here is the list of questions: {}
 
 Here is the pairs of responses to evaluate: {}.
 
-Consider each question and corresponding responses and rank the responses from best to worst.
+Consider each and every question with corresponding responses and make evaluation. The length of evaluation result must equal to the number of input questions.
 """
