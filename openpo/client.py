@@ -143,7 +143,7 @@ class OpenPO:
             responses (List[List[str]]): Pairwise responses to evaluate.
             prompt (str): Optional custom prompt for judge model to follow.
 
-        Returns: The evaluation data for responses with preferred, rejected, confidence_score and reason.
+        Returns (Dict): The evaluation data for responses with preferred, rejected, confidence_score and reason.
 
         Raises:
             AuthenticationError: If required API keys are missing or invalid.
@@ -166,9 +166,10 @@ class OpenPO:
             )
 
             if provider == "anthropic":
-                return res.content[0].input
+                result = res.content[0].input['"evaluation']
+            result = json.loads(res.choices[0].message.content)["evaluation"]
 
-            return res.choices[0].message.content
+            return {"evaluation": result}
         except (AuthenticationError, ValueError) as e:
             raise e
         except Exception as e:
@@ -176,7 +177,6 @@ class OpenPO:
                 provider=provider, message=f"Error during evaluation: {str(e)}"
             )
 
-    # TODO: need to include index of each question so that user knows which data corresponds to which question.
     def eval_multi(
         self,
         models: List[str],
@@ -191,7 +191,10 @@ class OpenPO:
             data (List[List]): Pairwise responses to evaluate.
             prompt (str): Optional custom prompt for judge model to follow.
 
-        Returns: The evaluation data for responses that all models agree on.
+        Returns (Dict): The evaluation data for responses that all models agree on.
+
+            - preference: Evaluation data on the input responses.
+            - q_index: Index of questions that reached consensus by the models.
 
         Raises:
             AuthenticationError: If required API keys are missing or invalid.
@@ -225,7 +228,7 @@ class OpenPO:
                 responses=responses,
                 prompt=prompt if prompt else None,
             )
-            parsed_res_a = res_a.content[0].input["preference"]
+            parsed_res_a = res_a.content[0].input["evaluation"]
 
             res_o = judge_o.generate(
                 model=o_model,
@@ -233,18 +236,22 @@ class OpenPO:
                 responses=responses,
                 prompt=prompt if prompt else None,
             )
-            parsed_res_o = json.loads(res_o.choices[0].message.content)["preference"]
+            parsed_res_o = json.loads(res_o.choices[0].message.content)["evaluation"]
 
             idx = self._get_model_consensus(
                 parsed_res_a,
                 parsed_res_o,
             )
 
-            return {"preference": [parsed_res_o[i] for i in idx]}
+            # ? instead of returning response from one model, combine two and send all?
+            return {
+                "evaluation": [parsed_res_o[i] for i in idx],
+                "q_index": idx,
+            }
         except (AuthenticationError, ValueError) as e:
             raise e
         except Exception as e:
             raise ProviderError(
-                provider="multi-eval",
+                provider="eval-multi",
                 message=f"Error during multi-model evaluation: {str(e)}",
             )

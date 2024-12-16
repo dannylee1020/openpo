@@ -19,7 +19,7 @@ class AnnotateModel(BaseModel):
 
 
 class Response(BaseModel):
-    preference: List[AnnotateModel]
+    evaluation: List[AnnotateModel]
 
 
 class Anthropic(LLMProvider):
