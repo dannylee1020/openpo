@@ -170,7 +170,7 @@ class OpenPO:
                 result = res.content[0].input['"evaluation']
             result = json.loads(res.choices[0].message.content)["evaluation"]
 
-            return {"evaluation": [result]}
+            return {"evaluation": result}
         except (AuthenticationError, ValueError) as e:
             raise e
         except Exception as e:
