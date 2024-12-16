@@ -73,16 +73,11 @@ class OpenPO:
         res_a: List[Dict],
         res_b: List[Dict],
     ) -> List[int]:
-        # TODO: implement error handling to skip?
-        if len(res_a) != len(res_b):
-            raise ValueError(
-                "responses for evaluation do not have identical number of responses."
-            )
 
         matching_indices = []
         for i, (a, b) in enumerate(zip(res_a, res_b)):
-            if a["rank"] == b["rank"]:
-                matching_indices.append(i)
+            if a.get("q_index") == b.get("q_index") and a["rank"] == b["rank"]:
+                matching_indices.append(a.get("q_index", i))
 
         return matching_indices
 
@@ -244,7 +239,6 @@ class OpenPO:
                 parsed_res_o,
             )
 
-            # ? instead of returning response from one model, combine two and send all?
             return {
                 "evaluation": [parsed_res_o[i] for i in idx],
                 "q_index": idx,
