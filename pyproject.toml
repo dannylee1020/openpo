@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "openpo"
-version = "0.5.12"
+version = "0.5.13"
 description = "Build high quality synthetic datasets with AI feedback from 200+ LLMs"
 authors = ["Daniel Lee <dannylee1020@gmail.com>"]
 license = "Apache-2.0"
