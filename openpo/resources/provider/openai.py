@@ -13,6 +13,7 @@ from .base import LLMProvider
 
 
 class AnnotateModel(BaseModel):
+    q_index: int
     rank: List[int]
     preferred_score: float
     rejected_score: float
@@ -57,6 +58,7 @@ class OpenAI(LLMProvider):
                 model=model,
                 messages=messages,
                 response_format=Response,
+                max_tokens=8192,
             )
 
             return res

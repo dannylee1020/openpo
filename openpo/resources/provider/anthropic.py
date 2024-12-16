@@ -12,6 +12,7 @@ from .base import LLMProvider
 
 
 class AnnotateModel(BaseModel):
+    q_index: int
     rank: List[int]
     preferred_score: float
     rejected_score: float
@@ -60,7 +61,7 @@ class Anthropic(LLMProvider):
                         ),
                     },
                 ],
-                max_tokens=4096,
+                max_tokens=8192,
                 tools=tools,
                 tool_choice={"type": "tool", "name": "build_response_output"},
             )
