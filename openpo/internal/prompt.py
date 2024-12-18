@@ -60,3 +60,11 @@ Here is the pairs of responses to evaluate: {}.
 
 Consider each and every question with corresponding responses and make evaluation. The length of evaluation result must equal to the number of input questions.
 """
+
+EVALUATION_QUERY_BATCH = """
+Here is the question: {}
+
+Here is the pair of responses to evaluate: {}.
+
+Make evaluation on question and responses by following the system prompt.
+"""
