@@ -61,8 +61,6 @@ class HuggingFace(LLMProvider):
                 - response_format (Optional[dict]): Desired format for the response
                 - seed (Optional[int]): Random seed for generation
                 - stop (Optional[int]): Stop sequence for generation
-                - stream (Optional[bool]): Whether to stream the response
-                - stream_options (Optional[dict]): Options for streaming
                 - temperature (Optional[float]): Sampling temperature
                 - top_logprobs (Optional[int]): Number of top log probabilities to return
                 - top_p (Optional[float]): Nucleus sampling parameter
@@ -81,6 +79,10 @@ class HuggingFace(LLMProvider):
         try:
             if params is None:
                 params = {}
+
+            # always set stream to false
+            params["stream"] = False
+            params["stream_option"] = None
 
             if params.get("response_format"):
                 params.update(

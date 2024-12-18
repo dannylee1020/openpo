@@ -78,20 +78,6 @@ Enables reproducible outputs by setting a fixed random seed for generation.
 ```
 Defines up to 4 sequences that will cause the model to stop generating further tokens when encountered.
 
-<br>
-
-```title="stream (bool)"
-* Optional
-* Default = False
-```
-Enables incremental response delivery through real-time streaming.
-
-<br>
-
-```title="stream_options (dict)"
-* Optional
-```
-Provides configuration options for streaming behavior when stream is enabled.
 
 <br>
 

@@ -29,32 +29,3 @@ class ChatCompletionOutputUsage:
     total_tokens: int
 
 ```
-
-## ChatCompletionStreamOutput
-
-
-```python
-class ChatCompletionStreamOutput:
-    id: str
-    provider: str
-    model: str
-    object: str
-    created: int
-    choices: List[ChatCompletionStreamOutputChoice]
-```
-
-```python
-class ChatCompletionStreamOutputChoice:
-    index: int
-    delta: ChatCompletionStreamOutputDelta
-    finish_reason: Optional[str] = None
-    logprobs: Optional[Any] = None
-```
-
-```python
-class ChatCompletionStreamOutputDelta:
-    role: str
-    content: str
-```
-
-
