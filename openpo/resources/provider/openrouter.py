@@ -6,7 +6,7 @@ import httpx
 
 from openpo.internal import prompt
 from openpo.internal.error import AuthenticationError, ProviderError
-from openpo.internal.response import ChatCompletionOutput, ChatCompletionStreamOutput
+from openpo.internal.response import ChatCompletionOutput
 
 from .base import LLMProvider
 
