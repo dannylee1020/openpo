@@ -1,5 +1,5 @@
 import json
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 from openpo.internal.error import AuthenticationError, ProviderError
 from openpo.resources.provider import Anthropic, OpenAI
@@ -14,7 +14,6 @@ class Evaluation:
         res_a: List[Dict],
         res_b: List[Dict],
     ) -> List[int]:
-
         matching_indices = []
         for i, (a, b) in enumerate(zip(res_a, res_b)):
             if a.get("q_index") == b.get("q_index") and a["rank"] == b["rank"]:
@@ -22,74 +21,35 @@ class Evaluation:
 
         return matching_indices
 
-    def eval_single(
-        self,
-        model: str,
-        questions: List[str],
-        responses: List[List[str]],
-        prompt: Optional[str] = None,
-    ):
-        """Use single LLM-as-a-judge method to evaluate responses for building preference data.
+    def _validate_provider(self, provider: str) -> None:
+        if provider not in ["openai", "anthropic"]:
+            raise ProviderError(provider, "Provider not supported for evaluation")
 
-         Args:
-             model (str): Model identifier to use as a judge. Follows provider/model-identifier format.
-             questions (List(str)): Questions for each response pair.
-             responses (List[List[str]]): Pairwise responses to evaluate.
-             prompt (str): Optional custom prompt for judge model to follow.
-
-         Returns (Dict): The evaluation data for responses with preferred, rejected, confidence_score and reason.
-
-         Raises:
-        b     AuthenticationError: If required API keys are missing or invalid.
-             ProviderError: For provider-specific errors during evaluation.
-             ValueError: If the model format is invalid or provider is not supported.
-        """
+    def _parse_response(self, response) -> List[Dict]:
         try:
-            provider = self.client._get_model_provider(model)
-            model_id = self.client._get_model_id(model)
-
-            if provider not in ["openai", "anthropic"]:
-                raise ProviderError(provider, "Provider not supported for evaluation")
-
-            llm = self.client._get_provider_instance(provider=provider)
-            res = llm.generate(
-                model=model_id,
-                questions=questions,
-                responses=responses,
-                prompt=prompt if prompt else None,
-            )
-
-            if provider == "anthropic":
-                result = res.content[0].input['"evaluation']
-            result = json.loads(res.choices[0].message.content)["evaluation"]
-
-            return {"evaluation": result}
-        except (AuthenticationError, ValueError) as e:
-            raise e
+            if "chatcmpl" in response.id:
+                return json.loads(response.choices[0].message.content)["evaluation"]
+            return response.content[0].input["evaluation"]
         except Exception as e:
-            raise ProviderError(
-                provider=provider, message=f"Error during evaluation: {str(e)}"
-            )
+            raise Exception(f"Error parsing model responses: {e}")
 
-    def eval_multi(
+    def eval(
         self,
         models: List[str],
         questions: List[str],
-        responses: List[List],
+        responses: List[List[str]],
         prompt: Optional[str] = None,
-    ):
-        """Use multiple LLMs as a judge for model consensus to evaluate responses for building preference data.
+    ) -> List[Dict]:
+        """Evaluate responses using either single or multiple LLMs as judges.
 
         Args:
-            models (List): List of models to use as a judge. Follows provider/model-identifier format.
-            questions (List(str)): Questions for each response pair.
+            models (Union[str, List[str]]): List of  model identifier or list of models to use as judges. Follows provider/model-identifier format.
+            questions (List[str]): Questions for each response pair.
             responses (List[List[str]]): Pairwise responses to evaluate.
             prompt (str): Optional custom prompt for judge model to follow.
 
-        Returns (Dict): The evaluation data for responses that all models agree on.
-
-            - preference: Evaluation data on the input responses.
-            - q_index: Index of questions that reached consensus by the models.
+        Returns:
+            List[Dict]: The evaluation data for responses. Response returns preferred, rejected, confidence_score and reason.
 
         Raises:
             AuthenticationError: If required API keys are missing or invalid.
@@ -97,55 +57,63 @@ class Evaluation:
             ValueError: If the model format is invalid or required models are missing.
         """
         try:
-            judge_a = self.client._get_provider_instance("anthropic")
-            judge_o = self.client_get_provider_instance("openai")
-
-            a_model = ""
-            o_model = ""
-
+            eval_res = []
             for m in models:
                 provider = self.client._get_model_provider(m)
-                if provider == "anthropic":
-                    a_model = self.client._get_model_id(m)
-                elif provider == "openai":
-                    o_model = self.client._get_model_id(m)
-                else:
-                    raise ProviderError(
-                        provider, "Provider not supported for evaluation"
-                    )
+                model_id = self.client._get_model_id(m)
 
-            if not a_model or not o_model:
-                raise ValueError("Both Anthropic and OpenAI models must be provided")
+                self._validate_provider(provider)
 
-            res_a = judge_a.generate(
-                model=a_model,
-                questions=questions,
-                responses=responses,
-                prompt=prompt if prompt else None,
-            )
-            parsed_res_a = res_a.content[0].input["evaluation"]
+                llm = self.client._get_provider_instance(provider=provider)
+                res = llm.generate(
+                    model=model_id,
+                    questions=questions,
+                    responses=responses,
+                    prompt=prompt if prompt else None,
+                )
+                eval_res.append(res)
 
-            res_o = judge_o.generate(
-                model=o_model,
-                questions=questions,
-                responses=responses,
-                prompt=prompt if prompt else None,
-            )
-            parsed_res_o = json.loads(res_o.choices[0].message.content)["evaluation"]
+            return eval_res
 
-            idx = self._get_model_consensus(
-                parsed_res_a,
-                parsed_res_o,
-            )
-
-            return {
-                "evaluation": [parsed_res_o[i] for i in idx],
-                "q_index": idx,
-            }
         except (AuthenticationError, ValueError) as e:
             raise e
         except Exception as e:
             raise ProviderError(
-                provider="eval-multi",
-                message=f"Error during multi-model evaluation: {str(e)}",
+                provider="", message=f"Error during evaluation: {str(e)}"
             )
+
+    def get_consensus(self, eval_A: List, eval_B: List):
+        """Reach consensus between two evaluation results
+
+        Args:
+            eval_A (List): List of batch results to compare
+            eval_B (List): List of batch results to compare
+
+        Returns:
+            List: List of evaluation results where both providers agreed on the rank
+
+        Raises:
+            Exception: If there's an error processing the batch results
+        """
+        try:
+            parsed_a = self._parse_response(
+                response=eval_A,
+            )
+            parsed_b = self._parse_response(
+                response=eval_B,
+            )
+
+            res = []
+            check = {}
+
+            for e in parsed_a:
+                q_index = e["q_index"]
+                check[q_index] = e["rank"]
+
+            for e in parsed_b:
+                q_index = e["q_index"]
+                if q_index in check and check[q_index] == e["rank"]:
+                    res.append(e)
+            return res
+        except Exception as e:
+            raise Exception(f"Error processing responses for consensus: {str(e)}")

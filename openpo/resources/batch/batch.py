@@ -16,15 +16,15 @@ class Batch:
 
     def eval(
         self,
-        model: str,
+        models: List[str],
         questions: List[str],
         responses: List[List[str]],
         prompt: Optional[str] = None,
     ):
-        """Use single LLM-as-a-judge method to evaluate responses for building preference data.
+        """Use input model as a judge to evaluate responses.
 
         Args:
-            model (str): Model identifier to use as a judge. Follows provider/model-identifier format.
+            models (str): List of model identifiers to use as a judge. Follows provider/model-identifier format.
             questions (List(str)): Questions for each response pair.
             responses (List[List[str]]): Pairwise responses to evaluate.
             prompt (str): Optional custom prompt for judge model to follow.
@@ -37,21 +37,26 @@ class Batch:
             ValueError: If the model format is invalid or provider is not supported.
         """
         try:
-            provider = self.client._get_model_provider(model)
-            model_id = self.client._get_model_id(model)
+            result = []
+            for m in models:
+                provider = self.client._get_model_provider(m)
+                model_id = self.client._get_model_id(m)
 
-            if provider not in ["openai", "anthropic"]:
-                raise ProviderError(provider, "Provider not supported for evaluation")
+                if provider not in ["openai", "anthropic"]:
+                    raise ProviderError(
+                        provider, "Provider not supported for evaluation"
+                    )
 
-            llm = self.client._get_provider_instance(provider=provider)
-            res = llm.generate_batch(
-                model=model_id,
-                questions=questions,
-                responses=responses,
-                prompt=prompt if prompt else None,
-            )
+                llm = self.client._get_provider_instance(provider=provider)
+                res = llm.generate_batch(
+                    model=model_id,
+                    questions=questions,
+                    responses=responses,
+                    prompt=prompt if prompt else None,
+                )
 
-            return res
+                result.append(res)
+            return result
         except (AuthenticationError, ValueError) as e:
             raise e
         except Exception as e:
@@ -87,17 +92,17 @@ class Batch:
 
     def get_consensus(
         self,
-        batch_openai: List,
-        batch_anthropic: List,
-    ):
-        """Get consensus between OpenAI and Anthropic batch results.
+        batch_A: List,
+        batch_B: List,
+    ) -> List[Dict]:
+        """Reach consensus between two batch results.
 
         Args:
-            batch_openai (List): List of batch results from OpenAI
-            batch_anthropic (List): List of batch results from Anthropic
+            batch_A (List): List of batch results to compare
+            batch_B (List): List of batch results to compare
 
         Returns:
-            List: List of evaluation results where both providers agreed on the rank
+            List[Dict]: List of evaluation results where both providers agree on
 
         Raises:
             Exception: If there's an error processing the batch results
@@ -107,30 +112,35 @@ class Batch:
             # only requires single pass on batch data to reach consensus.
             res = []
             check = {}
-            for r in batch_openai:
-                try:
+            for r in batch_A:
+                # check if batch is from openai
+                if isinstance(r, dict):
                     custom_id = r["custom_id"]
                     content = json.loads(
                         r["response"]["body"]["choices"][0]["message"]["content"]
                     )
-                    check[custom_id] = content["evaluation"][0]["rank"]
-                except (KeyError, json.JSONDecodeError) as e:
-                    continue  # Skip malformed entries
-
-            for r in batch_anthropic:
-                try:
+                else:
                     custom_id = r.custom_id
                     content = r.result.message.content[0].input
 
-                    # Check if same custom_id exists in OpenAI results and ranks match
-                    if (
-                        custom_id in check
-                        and check[custom_id] == content["evaluation"][0]["rank"]
-                    ):
-                        record = {"q_index": custom_id} | content["evaluation"][0]
-                        res.append(record)
-                except (KeyError, AttributeError) as e:
-                    continue
+                check[custom_id] = content["evaluation"][0]["rank"]
+
+            for r in batch_B:
+                if isinstance(r, dict):
+                    custom_id = r["custom_id"]
+                    content = json.loads(
+                        r["response"]["body"]["choices"][0]["message"]["content"]
+                    )
+                else:
+                    custom_id = r.custom_id
+                    content = r.result.message.content[0].input
+
+                if (
+                    custom_id in check
+                    and check[custom_id] == content["evaluation"][0]["rank"]
+                ):
+                    record = {"q_index": custom_id} | content["evaluation"][0]
+                    res.append(record)
 
             return res
         except Exception as e:

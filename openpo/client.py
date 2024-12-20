@@ -3,7 +3,7 @@ import os
 from typing import Any, Dict, List, Optional
 
 from .internal.error import AuthenticationError, ProviderError
-from .internal.response import ChatCompletionOutput, ChatCompletionStreamOutput
+from .internal.response import ChatCompletionOutput
 from .resources.batch.batch import Batch
 from .resources.eval.eval import Evaluation
 from .resources.provider import Anthropic, HuggingFace, OpenAI, OpenRouter
@@ -73,7 +73,7 @@ class OpenPO:
         models: List[str],
         messages: List[Dict[str, Any]],
         params: Optional[Dict[str, Any]] = None,
-    ) -> List[ChatCompletionOutput | ChatCompletionStreamOutput]:
+    ) -> List[ChatCompletionOutput]:
         """Generate completions using the specified LLM provider.
 
         Args:
@@ -112,7 +112,7 @@ class OpenPO:
         return responses
 
     @property
-    def eval(self):
+    def evaluate(self):
         return self._eval
 
     @property
