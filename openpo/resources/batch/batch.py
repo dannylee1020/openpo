@@ -64,7 +64,7 @@ class Batch:
                 provider=provider, message=f"Error during evaluation: {str(e)}"
             )
 
-    def retrieve_status(self, batch_id: str):
+    def check_status(self, batch_id: str):
         if batch_id.split("_")[0] == "batch":
             status = self.openai_client.batches.retrieve(batch_id)
         else:

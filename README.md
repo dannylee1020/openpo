@@ -122,34 +122,72 @@ response = client.completions(
 ```
 
 ### Evaluation
-OpenPO offers various ways to synthesize your dataset. To run evaluation, install extra dependencies by running
+OpenPO offers various ways to synthesize your dataset. To run evaluation, first install extra dependencies by running
 
 ```bash
 pip install openpo[eval]
 ```
 
 #### LLM-as-a-Judge
-To use single judge to evaluate your response data, use `eval_single`
+To use single judge to evaluate your response data, use `evaluate.eval`
 
 ```python
 client = OpenPO()
 
-res = openpo.eval_single(
-    model='openai/gpt-4o',
+res = openpo.evaluate.eval(
+    models=['openai/gpt-4o'],
     questions=questions,
     responses=responses,
 )
 ```
 
-To use multi judge, use `eval_multi`
+To use multi judge, pass multiple judge models
 
 ```python
-res = openpo.eval_multi(
+res_a, res_b = openpo.evaluate.eval(
     models=["openai/gpt-4o", "anthropic/claude-sonnet-3-5-latest"],
     questions=questions,
     responses=responses,
 )
+
+# get consensus for multi judge responses.
+result = openpo.evaluate.get_consensus(
+    eval_A=res_a,
+    eval_B=res_b,
+)
 ```
+<br>
+OpnePO supports batch processing for evaluating large dataset. To use batch processing for evaluation, use `batch.eval`
+
+> [!NOTE]
+> Batch processing is an asynchronous operation and could take up to 24 hours (usually completes much faster).
+
+```python
+info = openpo.batch.eval(
+    models=["openai/gpt-4o", "anthropic/claude-sonnet-3-5-latest"],
+    questions=questions,
+    responses=responses,
+)
+
+# check status
+status = openpo.batch.check_status(batch_id=info.id)
+```
+
+For multi-judge with batch processing:
+
+```python
+batch_a, batch_b = openpo.batch.eval(
+    models=["openai/gpt-4o", "anthropic/claude-sonnet-3-5-latest"],
+    questions=questions,
+    responses=responses,
+)
+
+result = openpo.batch.get_consensus(
+    batch_A=batch_a_result,
+    batch_B=batch_b_result,
+)
+```
+
 
 #### Pre-trained Models
 You can use pre-trained open source evaluation models. OpenPo currently supports two types of models: `PairRM` and `Prometheus2`.

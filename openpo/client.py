@@ -113,8 +113,22 @@ class OpenPO:
 
     @property
     def evaluate(self):
+        """Access the evaluation functionality for LLM responses.
+        This property provides access to the evaluation interface.
+
+        Returns:
+            Evaluation: An instance of the Evaluation class that provides methods
+                       for evaluating and comparing LLM outputs.
+        """
         return self._eval
 
     @property
     def batch(self):
+        """Access the batch processing functionality for LLM operations.
+        This property provides access to the batch processing interface
+
+        Returns:
+            Batch: An instance of the Batch class that provides methods for
+                  processing multiple LLM requests efficiently.
+        """
         return self._batch

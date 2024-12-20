@@ -4,14 +4,14 @@ Evaluation is the magic that synthesizes outputs data into finetuned ready datas
 pip install openpo[eval]
 ```
 
-## Using LLM-as-a-Judge
+## LLM-as-a-Judge
 Since [Constitutional AI: Harmlessness from AI Feedback](https://arxiv.org/abs/2212.08073) from Anthropic established a groundwork for using AI feedback beyond just ensuring model safety, [Subsequent researches](paper.md) have demonstrated the effectiveness of LLM-based evaluation for synthetic data generation, potentially offering a scalable alternative to human annotation.
 
-OpenPO adopts what is called LLM-as-a-Judge methodology, supporting both single and multi-judge configurations to generate high-quality dataset.
+OpenPO adopts LLM-as-a-Judge methodology, supporting both single and multi-judge configurations to generate high-quality dataset.
 
 
-### Usage
-To use a single LLM as a judge, you can use `eval_single` method.
+### Using API
+Simplest way to run evaluation is to make request to the models using `eval` method. To use a single model as a judge, pass a model into the models parameter.
 
 !!! Note
     Evaluation currently suppports OpenAI and Anthropic models only.
@@ -19,28 +19,29 @@ To use a single LLM as a judge, you can use `eval_single` method.
 ```python
 from openpo import OpenPO
 
-client = OpenPO()
+openpo = OpenPO()
 
 responses = [
     ["Lorem ipsum dolor sit amet", "consectetur adipiscing elit"],
     [" Aliquam pharetra neque", "ultricies elit imperdiet laoreet"],
 ]
 
-res = openpo.eval_single(
-    model='openai/gpt-4o',
+res = openpo.evaluate.eval(
+    models=['openai/gpt-4o'],
     questions=questions,
     responses=data,
 )
 ```
 <br>
-For more robust method, OpenPO supports multi-judge, where more than one model is used as a judge to reach consensus. You can use `eval_multi` method for this.
+For more robust method, OpenPO supports multi-judge, where more than one model is used as a judge to reach consensus. Simply pass in multiple models for this.
 
-The responses that judges disagree will be discarded and only the responses that reach agreement by the judges will be returned.
+The responses that judges disagree will be discarded and only the responses that reach agreement will be returned.
 
 ```python
-res = openpo.eval_multi(
+res = openpo.evaluate.eval(
     models=['openai/gpt-4o', 'anthropic/claude-sonnet-3-5-latest'],
-    data=data
+    questions=questions,
+    responses=responses,
 )
 ```
 <br>
@@ -48,7 +49,7 @@ If you want more control over the behavior of judge models, use custom prompt.
 
 ```python
 res = openpo.eval_single(
-    model='openai/gpt-4o',
+    model=['openai/gpt-4o'],
     questions=questions,
     responses=responses,
     prompt=prompt,
@@ -58,8 +59,56 @@ res = openpo.eval_single(
 
 For more details, take a look at the [API reference](api.md)
 
+### Using Batch Processing
+Using API to evaluate large volume of dataset can be costly and inefficient. Batch processing provides cost-effective way to handle tasks that do not require immediate responses.
 
-## Using Evaluation Models
+Running batch processing is similar to how evaluation with API works. To use single model evaluation, pass the model identifier to the models parameter.
+
+```python
+openpo = OpenPO()
+
+# run batch processing
+batch_info = openpo.batch.eval(
+    models=['openai/gpt-4o-mini'],
+    questions=questions,
+    responses=responses,
+)
+
+# check batch status
+status = openpo.batch.check_status(batch_info.id)
+
+# load batch result
+result = openpo.batch.load_batch(
+    filename=status.output_file_id,
+    provider='openai',
+)
+```
+
+Using multi-judge with batch processing is very similar:
+
+```python
+batch_a_info, batch_b_info = openpo.batch.eval(
+    models=["openai/gpt-4o-mini", "anthropic/anthropic/claude-3-5-haiku-20241022"],
+    questions=questions,
+    responses=responses,
+)
+
+# load batch results once done
+batch_a = openpo.batch.load_batch(filename=batch_a_info.output_file_id, provider='openai')
+batch_b = openpo.batch.load_batch(filename=batch_b_info.id, provider'anthropic')
+
+# get consensus
+result = openpo.batch.get_consensus(
+    batch_A=batch_a,
+    batch_B=batch_b,
+)
+
+```
+
+OpenAI and Anthropic provide UI for batch processing jobs. Visit their console to find more information such as status, metadata and more.
+
+
+##  Evaluation Models
 !!! Note
     Evaluation Models require to run on appropriate hardware with GPU and memory to make inference.
 

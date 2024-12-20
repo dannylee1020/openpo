@@ -4,13 +4,13 @@ To use structured output, use Pydantic model.
 from pydantic import BaseModel
 from openpo import OpenPO
 
-client = OpenPO()
+openpo = OpenPO()
 
 class ResponseModel(BaseModel):
     response: str
 
 
-res = client.completions(
+res = openpo.completions(
     models=["huggingface/Qwen/Qwen2.5-Coder-32B-Instruct"],
     messages=[
         {"role": "system", "content": PROMPT},
