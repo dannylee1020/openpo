@@ -157,7 +157,8 @@ result = openpo.evaluate.get_consensus(
 )
 ```
 <br>
-OpnePO supports batch processing for evaluating large dataset. To use batch processing for evaluation, use `batch.eval`
+
+OpnePO supports batch processing for evaluating large dataset in a cost-effective way.
 
 > [!NOTE]
 > Batch processing is an asynchronous operation and could take up to 24 hours (usually completes much faster).
