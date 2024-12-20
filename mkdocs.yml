@@ -67,8 +67,8 @@ nav:
   - Installation: installation.md
   - Quick Start: quickstart.md
   - Usage:
-    - Completions: completions.md
-    - Evaluations: evaluations.md
+    - Completion: completions.md
+    - Evaluation: evaluations.md
     - Structured Output (JSON): json.md
     - Storage: storage.md
   - Providers: provider.md

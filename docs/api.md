@@ -12,13 +12,10 @@ The main client interface for interacting with LLMs.
 
 ::: openpo.resources.batch.batch.Batch
 
-## PairRM
+## Evaluation Model
 ::: openpo.resources.pairrm.pairrm.PairRM
 
-
-## Prometheus 2
 ::: openpo.resources.prometheus2.prometheus2.Prometheus2
-
 
 ## Storage
 
