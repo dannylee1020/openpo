@@ -11,8 +11,8 @@ from openpo.resources.provider import Anthropic, OpenAI
 class Batch:
     def __init__(self, client):
         self.client = client
-        self.openai_client = OpenAIClient()
-        self.anthropic_client = AnthropicClient()
+        self.openai_client = OpenAIClient(api_key=self.client.openai_api_key)
+        self.anthropic_client = AnthropicClient(api_key=self.client.anthropic_api_key)
 
     def eval(
         self,
