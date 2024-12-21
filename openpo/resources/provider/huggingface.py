@@ -82,7 +82,7 @@ class HuggingFace(LLMProvider):
 
             # always set stream to false
             params["stream"] = False
-            params["stream_option"] = None
+            params["stream_options"] = None
 
             if params.get("response_format"):
                 params.update(
