@@ -1,5 +1,5 @@
 import json
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from anthropic import Anthropic as AnthropicClient
 from openai import OpenAI as OpenAIClient
