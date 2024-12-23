@@ -75,7 +75,7 @@ batch_info = openpo.batch.eval(
 )
 
 # check batch status
-status = openpo.batch.check_status(batch_info.id)
+status = openpo.batch.check_status(batch_info[0].id)
 
 # load batch result
 result = openpo.batch.load_batch(
