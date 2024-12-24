@@ -49,7 +49,7 @@ class HuggingFace(LLMProvider):
         Generate text completions using specified HuggingFace model.
 
         Args:
-            models (List[str]): List of model identifiers to use for generation.
+            model (str): model identifier to use for generation.
             messages (List[Dict[str, Any]]): List of message dictionaries containing
                 the conversation history.
             params (Optional[Dict[str, Any]]): Additional parameters for the generation:
