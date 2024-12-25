@@ -1,20 +1,24 @@
 
 List of providers OpenPO currently supports.
 
-## For Completions
+## For Completion
 
-`completions` method supports the models from the following providers:
+Completion supports the models from the following providers:
 
-| Provider | Handle |
+| Provider | Name |
 |:----------|:----------|
 | HuggingFace | `huggingface` |
 | OpenRouter | `openrouter` |
+
+
+### vLLM
+List of all supported model by vLLM can be found [here](https://docs.vllm.ai/en/stable/models/supported_models.html).
 
 ## For Evaluations
 
 LLM-as-a-judge evaluation supports models from the following providers:
 
-| Provider | Handle |
+| Provider | Name |
 |:----------|:----------|
 | OpenAI | `openai` |
 | Anthropic | `anthropic` |

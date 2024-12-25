@@ -8,6 +8,10 @@ The main client interface for interacting with LLMs.
 
 
 ## Inference
+::: openpo.VLLM
+
+:::openpo.resources.completion.completion.Completion
+
 ::: openpo.resources.eval.eval.Evaluation
 
 ::: openpo.resources.batch.batch.Batch

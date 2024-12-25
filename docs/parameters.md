@@ -1,9 +1,10 @@
+Following is available model parameters for completion.
 
-Following is the list of parameters for completions.
+## Completion using API
 
-## Required Parameters
+### Required Parameters
 
-```title="models (list[str])"
+```title="model (str, list[str])"
 * Required
 ```
 Specifies the model to use for text generation. Can be a HuggingFace or OpenRouter model
@@ -15,7 +16,7 @@ Specifies the model to use for text generation. Can be a HuggingFace or OpenRout
 ```
 messages to send to model. OpenAI format required: `{"role", "content"}`
 
-## Optional Parameters
+### Optional Parameters
 
 ```title="frequency_penalty (float)"
 * Optional, -2.0 to 2.0
@@ -133,3 +134,17 @@ A list of functions that the model may use to generate structured outputs
 Extra parameters to control the model outputs from the model list except the first one . Currently supports `temperature` and `frequency_penalty`
 
 <br>
+
+## Completion using vLLM
+
+Below is the list of parameters for vLLM configuration and its model.
+
+
+### LLM Engine
+[LLM configuration](https://docs.vllm.ai/en/stable/dev/offline_inference/llm.html#vllm.LLM)
+
+### Chat Parameter
+[Chat](https://docs.vllm.ai/en/stable/dev/offline_inference/llm.html#vllm.LLM.chat)
+
+### Sampling Parameters
+[Sampling Parameters](https://docs.vllm.ai/en/stable/dev/sampling_params.html#sampling-parameters)

@@ -10,8 +10,8 @@ class ResponseModel(BaseModel):
     response: str
 
 
-res = openpo.completions(
-    models=["huggingface/Qwen/Qwen2.5-Coder-32B-Instruct"],
+res = openpo.completion.generate(
+    model="huggingface/Qwen/Qwen2.5-Coder-32B-Instruct",
     messages=[
         {"role": "system", "content": PROMPT},
         {"role": "system", "content": MESSAGE},

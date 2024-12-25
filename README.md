@@ -2,10 +2,8 @@
 [![PyPI version](https://img.shields.io/pypi/v/openpo.svg)](https://pypi.org/project/openpo/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Documentation](https://img.shields.io/badge/docs-docs.openpo.dev-blue)](https://docs.openpo.dev)
-![Python](https://img.shields.io/badge/python->=3.10.1-blue.svg)
 
-
-OpenPO simplifies building synthetic datasets for preference tuning from 200+ LLMs.
+OpenPO simplifies building synthetic dataset with AI feedback and state-of-art evaluation methods.
 
 | Resources | Notebooks |
 |----------|----------|
@@ -14,18 +12,17 @@ OpenPO simplifies building synthetic datasets for preference tuning from 200+ LL
 | Evaluating with LLM Judge| 📔 [Notebook](https://colab.research.google.com/drive/1_QrmejW2Ym8yzP5RLJbLpVNA_FsEt2ZG?usp=sharing) |
 
 
-
-## What is OpenPO?
-OpenPO is an open source library that simplifies the process of building synthetic datasets for LLM preference tuning. By collecting outputs from 200 + LLMs and synthesizing them using research-proven methodologies, OpenPO helps developers build better, more fine-tuned language models with minimal effort.
-
 ## Key Features
 
 - 🤖 **Multiple LLM Support**: Collect diverse set of outputs from 200+ LLMs
 
+- ⚡ **High Performance Inference**: Native vLLM support for optimized inference
+
+- 🚀 **Scalable Processing**: Built-in batch processing capabilities for efficient large-scale data generation
+
 - 📊 **Research-Backed Evaluation Methods**: Support for state-of-art evaluation methods for data synthesis
 
 - 💾 **Flexible Storage:** Out of the box storage providers for HuggingFace and S3.
-
 
 ## Installation
 ### Install from PyPI (recommended)
@@ -67,7 +64,7 @@ from openpo import OpenPO
 
 client = OpenPO()
 
-response = client.completions(
+response = client.completion.generate(
     models = [
         "huggingface/Qwen/Qwen2.5-Coder-32B-Instruct",
         "huggingface/mistralai/Mistral-7B-Instruct-v0.3",
@@ -86,7 +83,7 @@ You can also call models with OpenRouter.
 # make request to OpenRouter
 client = OpenPO()
 
-response = client.completions(
+response = client.completion.generate(
     models = [
         "openrouter/qwen/qwen-2.5-coder-32b-instruct",
         "openrouter/mistralai/mistral-7b-instruct-v0.3",
@@ -103,7 +100,7 @@ response = client.completions(
 OpenPO takes default model parameters as a dictionary. Take a look at the documentation for more detail.
 
 ```python
-response = client.completions(
+response = client.completion.generate(
     models = [
         "huggingface/Qwen/Qwen2.5-Coder-32B-Instruct",
         "huggingface/mistralai/Mistral-7B-Instruct-v0.3",
@@ -209,10 +206,8 @@ To use Prometheus2:
 
 ```python
 from openpo import Prometheus2
-from openpo.resources.provider import VLLM
 
-model = VLLM<(model="prometheus-eval/prometheus-7b-v2.0")
-pm = Prometheus2(model=model)
+pm = Prometheus2(model="prometheus-eval/prometheus-7b-v2.0")
 
 feedback = pm.eval_relative(
     instructions=instructions,

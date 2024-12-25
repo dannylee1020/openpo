@@ -1,40 +1,43 @@
-Start using OpenPO in your code in minutes.
-
 ## Set your API Key
-Configure your API key as an environment variable. You can also pass the keyㄴ into the client.
+Configure your API key as an environment variable. You can also pass the key into the client.
 
 ```bash
-# for completions
+# for completion
 export HF_API_KEY=<your-huggingface-api-key>
 export OPENROUTER_API_KEY=<your-openrouter-api-key>
 
-# for evaluations
+# for evaluation
 export OPENAI_API_KEY=<your-openai-api-key>
 export ANTHROPIC_API_KEY=<your-anthropic-api-key>
 ```
 
 ## Basic Usage
-To call multiple models, simply add models of your choice to a list and pass it into the `completions` method.
-
-!!! Note
-    OpenPO requires provider name to be prepended to the model identifier in `provider/model-id` format. Refer to the [provider section of the documentation](provider.md)
-    for more information.
+`model` parameter accepts a model identifier or list of model identifiers.
 
 ```python
 from openpo import OpenPO
 
 client = OpenPO()
 
-response = client.completions(
-    models = [
-        "huggingface/Qwen/Qwen2.5-Coder-32B-Instruct",
-        "huggingface/mistralai/Mistral-7B-Instruct-v0.3",
-        "huggingface/microsoft/Phi-3.5-mini-instruct",
-    ],
+# use single model
+response = client.completion.generate(
+    model="huggingface/mistralai/Mistral-7B-Instruct-v0.3",
     messages=[
         {"role": "system", "content": PROMPT},
-        {"role": "system", "content": MESSAGE},
-    ],
+        {"role": "user", "content": MESSAGE},
+    ]
+)
+
+# use multiple models
+response = client.completion.generate(
+    model=[
+        "huggingface/mistralai/Mistral-7B-Instruct-v0.3",
+        "huggingface/microsoft/Phi-3.5-mini-instruct"
+    ]
+    messages=[
+        {"role": "system", "content": PROMPT},
+        {"role": "user", "content": MESSAGE},
+    ]
 )
 ```
 
@@ -42,31 +45,30 @@ Use with OpenRouter models:
 ```python
 client = OpenPO()
 
-response = client.completions(
-    models = [
-        "openrouter/qwen/qwen-2.5-coder-32b-instruct",
+response = client.completion.generate(
+    model=[
         "openrouter/mistralai/mistral-7b-instruct-v0.3",
         "openrouter/microsoft/phi-3.5-mini-128k-instruct",
     ],
     messages=[
         {"role": "system", "content": PROMPT},
-        {"role": "system", "content": MESSAGE},
+        {"role": "user", "content": MESSAGE},
     ],
 )
 ```
 
 ### Inference Endpoint
-To call models deployed on Hugging Face Inference Endpoint, simply pass in endpoints to the `models` parameter
+Call models deployed on HuggingFace Inference Endpoint
 
 ```python
-response = client.completions(
-    models = [
+response = client.completion.generate(
+    model=[
         'huggingface/your-inference-endpoint-1',
         'huggingface/your-inference-endpoint-2',
     ],
     messages=[
         {"role": "system", "content": PROMPT},
-        {"role": "system", "content": MESSAGE},
+        {"role": "user", "content": MESSAGE},
     ],
 )
 ```
