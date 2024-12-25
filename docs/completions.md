@@ -1,7 +1,7 @@
 Completion is the building block of synthetic data generation. It allows you to easily generate outputs from any LLM of your choice.
 
 ## Using API
-Easiest way to generate outputs from LLMs is via API. `chat.generate` method provides OpenAI compatible interface to make request to various endpoints to gather outputs.
+Easiest way to generate outputs from LLMs is via API. OpenPO provides OpenAI compatible interface to make request to various endpoints to gather outputs.
 
 OpenPO supports various model parameters. You can pass them in as a dictionary to `params`
 
