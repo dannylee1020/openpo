@@ -1,7 +1,5 @@
 from typing import Any, Dict, List, Optional, Union
 
-from vllm.outputs import RequestOutput
-
 from openpo.internal.error import ProviderError
 
 from .base import LLMProvider
@@ -48,7 +46,7 @@ class VLLM:
         tools: Optional[List[Dict[str, Any]]] = None,
         mm_processor_kwargs: Optional[Dict[str, Any]] = None,
         sampling_params: Optional[Dict] = {},
-    ) -> List[RequestOutput]:
+    ) -> List:
         """Generate responses using the vLLM model.
 
         This method processes input messages and generates responses using the loaded model.
