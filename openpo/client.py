@@ -2,8 +2,6 @@ import json
 import os
 from typing import Any, Dict, List, Optional
 
-from vllm import LLM
-
 from .internal.error import AuthenticationError, ProviderError
 from .resources.batch.batch import Batch
 from .resources.completion.completion import Completion
