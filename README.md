@@ -24,13 +24,22 @@ OpenPO simplifies building synthetic dataset with AI feedback and state-of-art e
 
 - 💾 **Flexible Storage:** Out of the box storage providers for HuggingFace and S3.
 
+
 ## Installation
 ### Install from PyPI (recommended)
 OpenPO uses pip for installation. Run the following command in the terminal to install OpenPO:
 
 ```bash
 pip install openpo
+
+# to use vllm
+pip install openpo[vllm]
+
+# for running evaluation models
+pip install openpo[eval]
 ```
+
+
 
 ### Install from source
 Clone the repository first then run the follow command
@@ -119,11 +128,8 @@ response = client.completion.generate(
 ```
 
 ### Evaluation
-OpenPO offers various ways to synthesize your dataset. To run evaluation, first install extra dependencies by running
+OpenPO offers various ways to synthesize your dataset.
 
-```bash
-pip install openpo[eval]
-```
 
 #### LLM-as-a-Judge
 To use single judge to evaluate your response data, use `evaluate.eval`
