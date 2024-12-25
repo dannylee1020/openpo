@@ -20,6 +20,7 @@ class VLLM:
             model=model,
             **vllm_kwargs,
         )
+        self.SamplingParams = SamplingParams
 
     ## validation required by prometheus
     def validate_vllm(self):
@@ -33,7 +34,7 @@ class VLLM:
         **kwargs: Union[int, float, str],
     ) -> List[str]:
         prompts = [prompt.strip() for prompt in prompts]
-        params = SamplingParams(**kwargs)
+        params = self.SamplingParams(**kwargs)
 
         outputs = self.model.generate(prompts, params, use_tqdm=use_tqdm)
         outputs = [output.outputs[0].text for output in outputs]

@@ -34,6 +34,7 @@ class VLLM:
             )
 
         self.model = LLM(model=model, **kwargs)
+        self.SamplingParam = SamplingParams
 
     def generate(
         self,
@@ -77,7 +78,7 @@ class VLLM:
             ProviderError: If generation fails, with details about the error.
         """
         try:
-            params = SamplingParams(**sampling_params)
+            params = self.SamplingParams(**sampling_params)
             res = self.model.chat(
                 messages=messages,
                 use_tqdm=use_tqdm,

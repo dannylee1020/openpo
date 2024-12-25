@@ -8,7 +8,6 @@ from .internal.error import AuthenticationError, ProviderError
 from .resources.batch.batch import Batch
 from .resources.completion.completion import Completion
 from .resources.eval.eval import Evaluation
-from .resources.provider import Anthropic, HuggingFace, OpenAI, OpenRouter
 
 
 class OpenPO:
@@ -52,28 +51,36 @@ class OpenPO:
         if provider == "huggingface":
             if not self.hf_api_key:
                 raise AuthenticationError("HuggingFace")
+            from .resources.provider import HuggingFace
+
             return HuggingFace(api_key=self.hf_api_key)
 
         if provider == "openrouter":
             if not self.openrouter_api_key:
                 raise AuthenticationError("OpenRouter")
+            from .resources.provider import OpenRouter
+
             return OpenRouter(api_key=self.openrouter_api_key)
 
         if provider == "openai":
             if not self.openai_api_key:
                 raise AuthenticationError("OpenAI")
+            from .resources.provider import OpenAI
+
             return OpenAI(api_key=self.openai_api_key)
 
         if provider == "anthropic":
             if not self.anthropic_api_key:
                 raise AuthenticationError("Anthropic")
+            from .resources.provider import Anthropic
+
             return Anthropic(api_key=self.anthropic_api_key)
 
         raise ProviderError(provider, "Unsupported model provider")
 
     @property
     def completion(self):
-        """Access the chat completion functionality for LLM response.
+        """Access the chat completion functionality for LLM response.µ
         This property provides access to completion interfacce.
 
         Returns:

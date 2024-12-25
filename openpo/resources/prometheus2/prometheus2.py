@@ -26,6 +26,10 @@ class Prometheus2:
                 REASONING_RUBRIC,
                 RELATIVE_PROMPT_WO_REF,
             )
+
+            self.PrometheusEval = PrometheusEval
+            self.ABSOLUTE_PROMPT_WO_REF = ABSOLUTE_PROMPT_WO_REF
+            self.RELATIVE_PROMPT_WO_REF = RELATIVE_PROMPT_WO_REF
         except ImportError:
             raise ImportError(
                 "Prometheus2 requires additional dependencies. Install with: pip install openpo[eval]"
@@ -119,9 +123,9 @@ class Prometheus2:
             Exception: If there's an error during the evaluation process.
         """
         try:
-            judge = PrometheusEval(
+            judge = self.PrometheusEval(
                 model=self.model,
-                relative_grade_template=RELATIVE_PROMPT_WO_REF,
+                relative_grade_template=self.RELATIVE_PROMPT_WO_REF,
             )
             feedbacks, scores = judge.relative_grade(
                 instructions=instructions,
@@ -168,9 +172,9 @@ class Prometheus2:
             Exception: If there's an error during the evaluation process.
         """
         try:
-            judge = PrometheusEval(
+            judge = self.PrometheusEval(
                 model=self.model,
-                absolute_grade_template=ABSOLUTE_PROMPT_WO_REF,
+                absolute_grade_template=self.ABSOLUTE_PROMPT_WO_REF,
             )
             feedbacks, scores = judge.absolute_grade(
                 instructions=instructions,

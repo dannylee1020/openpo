@@ -2,7 +2,6 @@ import json
 from typing import Dict, List, Optional, Union
 
 from openpo.internal.error import AuthenticationError, ProviderError
-from openpo.resources.provider import Anthropic, OpenAI
 
 
 class Evaluation:
