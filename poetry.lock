@@ -4792,9 +4792,10 @@ test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", 
 type = ["pytest-mypy"]
 
 [extras]
-eval = ["llm-blender", "prometheus-eval", "triton", "vllm"]
+eval = ["llm-blender", "prometheus-eval"]
+vllm = ["torch", "triton", "vllm"]
 
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10.1,<4.0"
-content-hash = "df4528aae2b31adb4d4a25dd56b0dfd93e58dac2edcd34d4d4094d535ff8eec5"
+content-hash = "6ed21eac47fcd31e456f3df53a74662d9477c25cba5e68454db69207aa7c774a"
