@@ -1,9 +1,6 @@
 import json
 from typing import Dict, List, Optional, Union
 
-from anthropic import Anthropic as AnthropicClient
-from openai import OpenAI as OpenAIClient
-
 from openpo.internal.error import AuthenticationError, ProviderError
 from openpo.resources.provider import Anthropic, OpenAI
 
@@ -11,8 +8,30 @@ from openpo.resources.provider import Anthropic, OpenAI
 class Batch:
     def __init__(self, client):
         self.client = client
-        self.openai_client = OpenAIClient(api_key=self.client.openai_api_key)
-        self.anthropic_client = AnthropicClient(api_key=self.client.anthropic_api_key)
+        self._openai_client = None
+        self._anthropic_client = None
+
+    @property
+    def openai_client(self):
+        if self._openai_client is None:
+            from openai import OpenAI as OpenAIClient
+
+            if not self.client.openai_api_key:
+                raise AuthenticationError("OpenAI")
+            self._openai_client = OpenAIClient(api_key=self.client.openai_api_key)
+        return self._openai_client
+
+    @property
+    def anthropic_client(self):
+        if self._anthropic_client is None:
+            from anthropic import Anthropic as AnthropicClient
+
+            if not self.client.anthropic_api_key:
+                raise AuthenticationError("Anthropic")
+            self._anthropic_client = AnthropicClient(
+                api_key=self.client.anthropic_api_key
+            )
+        return self._anthropic_client
 
     def _validate_provider(self, provider: str) -> None:
         if provider not in ["openai", "anthropic"]:
