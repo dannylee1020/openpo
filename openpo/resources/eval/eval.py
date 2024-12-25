@@ -9,18 +9,6 @@ class Evaluation:
     def __init__(self, client):
         self.client = client
 
-    def _get_model_consensus(
-        self,
-        res_a: List[Dict],
-        res_b: List[Dict],
-    ) -> List[int]:
-        matching_indices = []
-        for i, (a, b) in enumerate(zip(res_a, res_b)):
-            if a.get("q_index") == b.get("q_index") and a["rank"] == b["rank"]:
-                matching_indices.append(a.get("q_index", i))
-
-        return matching_indices
-
     def _validate_provider(self, provider: str) -> None:
         if provider not in ["openai", "anthropic"]:
             raise ProviderError(provider, "Provider not supported for evaluation")
@@ -35,7 +23,7 @@ class Evaluation:
 
     def eval(
         self,
-        models: List[str],
+        model: Union[str, List[str]],
         questions: List[str],
         responses: List[List[str]],
         prompt: Optional[str] = None,
@@ -43,7 +31,7 @@ class Evaluation:
         """Evaluate responses using either single or multiple LLMs as judges.
 
         Args:
-            models (Union[str, List[str]]): List of  model identifier or list of models to use as judges. Follows provider/model-identifier format.
+            model (str, List[str]): model identifier or list of them to use as a judge. Follows provider/model-identifier format.
             questions (List[str]): Questions for each response pair.
             responses (List[List[str]]): Pairwise responses to evaluate.
             prompt (str): Optional custom prompt for judge model to follow.
@@ -56,9 +44,29 @@ class Evaluation:
             ProviderError: For provider-specific errors during evaluation.
             ValueError: If the model format is invalid or required models are missing.
         """
-        try:
-            eval_res = []
-            for m in models:
+        if isinstance(model, str):
+            try:
+                provider = self.client._get_model_provider(model)
+                model_id = self.client._get_model_id(model)
+
+                self._validate_provider(provider)
+
+                llm = self.client._get_provider_instance(provider)
+                res = llm.generate(
+                    model=model_id,
+                    questions=questions,
+                    responses=responses,
+                    prompt=prompt if prompt else None,
+                )
+                return res
+            except Exception as e:
+                raise ProviderError(
+                    provider=provider, message=f"Error during evaluation: {str(e)}"
+                )
+
+        eval_res = []
+        for m in model:
+            try:
                 provider = self.client._get_model_provider(m)
                 model_id = self.client._get_model_id(m)
 
@@ -72,17 +80,13 @@ class Evaluation:
                     prompt=prompt if prompt else None,
                 )
                 eval_res.append(res)
+            except Exception as e:
+                raise ProviderError(
+                    provider=provider, message=f"Error during evaluation: {str(e)}"
+                )
+        return eval_res
 
-            return eval_res
-
-        except (AuthenticationError, ValueError) as e:
-            raise e
-        except Exception as e:
-            raise ProviderError(
-                provider="", message=f"Error during evaluation: {str(e)}"
-            )
-
-    def get_consensus(self, eval_A: List, eval_B: List):
+    def get_consensus(self, eval_A: List, eval_B: List) -> List:
         """Reach consensus between two evaluation results
 
         Args:

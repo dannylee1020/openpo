@@ -72,7 +72,14 @@ class OpenPO:
         raise ProviderError(provider, "Unsupported model provider")
 
     @property
-    def chat(self):
+    def completion(self):
+        """Access the chat completion functionality for LLM response.
+        This property provides access to completion interfacce.
+
+        Returns:
+            Completion: An instance of the Completion class that provides method
+                        for generatng response from LLM.
+        """
         return self._completion
 
     @property

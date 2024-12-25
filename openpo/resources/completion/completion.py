@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from openpo.internal.error import AuthenticationError, ProviderError
 from openpo.internal.response import ChatCompletionOutput
@@ -10,14 +10,14 @@ class Completion:
 
     def generate(
         self,
-        models: List[str],
+        model: Union[str, List[str]],
         messages: List[Dict[str, Any]],
         params: Optional[Dict[str, Any]] = None,
     ) -> List[ChatCompletionOutput]:
         """Generate completions using the specified LLM provider.
 
         Args:
-            models (List[str]): List of model identifiers to use for generation. Follows <provider>/<model-identifier> format.
+            model (str, List[str]): model identifier or list of model identifiers to use for generation. Follows <provider>/<model-identifier> format.
             messages (List[Dict[str, Any]]): List of message dictionaries containing
                 the conversation history and prompts.
             params (Optional[Dict[str, Any]]): Additional model parameters for the request (e.g., temperature, max_tokens).
@@ -30,9 +30,21 @@ class Completion:
             ProviderError: For provider-specific errors during completion generation.
             ValueError: If the model format is invalid.
         """
-        responses = []
+        if isinstance(model, str):
+            try:
+                provider = self.client._get_model_provider(model=model)
+                model_id = self.client._get_model_id(model=model)
+                llm = self.client._get_provider_instance(provider=provider)
 
-        for m in models:
+                res = llm.generate(model=model_id, messages=messages, params=params)
+                return res
+            except Exception as e:
+                raise ProviderError(
+                    provider=provider,
+                    message=f"Failed to execute chat completions: {str(e)}",
+                )
+        responses = []
+        for m in model:
             try:
                 provider = self.client._get_model_provider(model=m)
                 model_id = self.client._get_model_id(model=m)
@@ -48,5 +60,4 @@ class Completion:
                     provider=provider,
                     message=f"Failed to execute chat completions: {str(e)}",
                 )
-
         return responses

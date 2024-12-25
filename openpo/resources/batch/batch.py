@@ -1,5 +1,5 @@
 import json
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 from anthropic import Anthropic as AnthropicClient
 from openai import OpenAI as OpenAIClient
@@ -14,9 +14,13 @@ class Batch:
         self.openai_client = OpenAIClient(api_key=self.client.openai_api_key)
         self.anthropic_client = AnthropicClient(api_key=self.client.anthropic_api_key)
 
+    def _validate_provider(self, provider: str) -> None:
+        if provider not in ["openai", "anthropic"]:
+            raise ProviderError(provider, "Provider not supported for evaluation")
+
     def eval(
         self,
-        models: List[str],
+        model: Union[str, List[str]],
         questions: List[str],
         responses: List[List[str]],
         prompt: Optional[str] = None,
@@ -24,7 +28,7 @@ class Batch:
         """Use input model as a judge to evaluate responses.
 
         Args:
-            models (str): List of model identifiers to use as a judge. Follows provider/model-identifier format.
+            model (str, List[str]): model identifier or list of them to use as a judge. Follows provider/model-identifier format.
             questions (List(str)): Questions for each response pair.
             responses (List[List[str]]): Pairwise responses to evaluate.
             prompt (str): Optional custom prompt for judge model to follow.
@@ -36,16 +40,12 @@ class Batch:
             ProviderError: For provider-specific errors during evaluation.
             ValueError: If the model format is invalid or provider is not supported.
         """
-        try:
-            result = []
-            for m in models:
-                provider = self.client._get_model_provider(m)
-                model_id = self.client._get_model_id(m)
+        if isinstance(model, str):
+            try:
+                provider = self.client._get_model_provider(model)
+                model_id = self.client._get_model_id(model)
 
-                if provider not in ["openai", "anthropic"]:
-                    raise ProviderError(
-                        provider, "Provider not supported for evaluation"
-                    )
+                self._validate_provider(provider)
 
                 llm = self.client._get_provider_instance(provider=provider)
                 res = llm.generate_batch(
@@ -54,15 +54,36 @@ class Batch:
                     responses=responses,
                     prompt=prompt if prompt else None,
                 )
+                return res
+            except Exception as e:
+                raise ProviderError(
+                    provider=provider,
+                    message=f"Error during batch processing: {str(e)}",
+                )
 
+        result = []
+        for m in model:
+            try:
+                provider = self.client._get_model_provider(m)
+                model_id = self.client._get_model_id(m)
+
+                self._validate_provider(provider)
+
+                llm = self.client._get_provider_instance(provider=provider)
+                res = llm.generate_batch(
+                    model=model_id,
+                    questions=questions,
+                    responses=responses,
+                    prompt=prompt if prompt else None,
+                )
                 result.append(res)
-            return result
-        except (AuthenticationError, ValueError) as e:
-            raise e
-        except Exception as e:
-            raise ProviderError(
-                provider=provider, message=f"Error during evaluation: {str(e)}"
-            )
+            except Exception as e:
+                raise ProviderError(
+                    provider=provider,
+                    message=f"Error during batch processing: {str(e)}",
+                )
+
+        return result
 
     def check_status(self, batch_id: str):
         if batch_id.split("_")[0] == "batch":
