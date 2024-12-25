@@ -16,7 +16,8 @@ class Prometheus2:
 
     def __init__(self, model):
         try:
-            from prometheus_eval import (
+            from prometheus_eval import PrometheusEval
+            from prometheus_eval.prompts import (
                 ABSOLUTE_PROMPT_WO_REF,
                 FACTUAL_VALIDITY_RUBRIC,
                 HARMLESSNESS_RUBRIC,
@@ -24,7 +25,6 @@ class Prometheus2:
                 HONESTY_RUBRIC,
                 REASONING_RUBRIC,
                 RELATIVE_PROMPT_WO_REF,
-                PrometheusEval,
             )
         except ImportError:
             raise ImportError(
