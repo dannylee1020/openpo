@@ -1,5 +1,9 @@
 from typing import List, Tuple
 
+from openpo.internal.error import ProviderError
+
+from .vllm import VLLM
+
 
 class Prometheus2:
     """
@@ -26,8 +30,13 @@ class Prometheus2:
             raise ImportError(
                 "Prometheus2 requires additional dependencies. Install with: pip install openpo[eval]"
             )
-
-        self.model = model
+        try:
+            self.model = VLLM(model=model)
+        except Exception as e:
+            raise ProviderError(
+                "Prometheus2",
+                message=f"failed to initialize Prometheus model: {str(e)}",
+            )
         self.rubric_mapping = {
             "factual-validity": FACTUAL_VALIDITY_RUBRIC,
             "helpfulness": HELPFULNESS_RUBRIC,
