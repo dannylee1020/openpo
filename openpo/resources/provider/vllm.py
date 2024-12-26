@@ -32,7 +32,7 @@ class VLLM:
             )
 
         self.model = LLM(model=model, **kwargs)
-        self.SamplingParam = SamplingParams
+        self.SamplingParams = SamplingParams
 
     def generate(
         self,
